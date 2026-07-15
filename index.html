@@ -34,7 +34,6 @@
   }
   .num{font-variant-numeric:tabular-nums}
 
-  /* ===== Шапка ===== */
   header{
     background:var(--accent); color:var(--head-ink);
     padding:calc(14px + env(safe-area-inset-top)) 20px 22px;
@@ -54,12 +53,10 @@
   .mode-tabs button.on{background:rgba(255,255,255,.18);opacity:1}
   .balance-label{font-size:12px;opacity:.65;text-transform:uppercase;letter-spacing:1.2px}
   .balance{font-size:38px;font-weight:700;margin:4px 0 2px;letter-spacing:-1px}
-  .wallet-line{font-size:13px;opacity:.7;margin-bottom:10px}
-  .savings-block{margin-bottom:14px;cursor:pointer}
-  .savings-line{font-size:14px;opacity:.9}
+  .wallet-line{font-size:13px;opacity:.7;margin-bottom:8px}
+  .savings-line{font-size:14px;opacity:.9;margin-bottom:4px}
   .savings-line b{color:#9FC4F2}
-  .goal-track{height:5px;border-radius:3px;background:rgba(255,255,255,.15);margin-top:6px;overflow:hidden}
-  .goal-track div{height:100%;background:#9FC4F2;border-radius:3px;transition:width .4s}
+  .savings-line:last-of-type{margin-bottom:12px}
   .totals{display:flex;gap:10px}
   .pill{flex:1;background:rgba(255,255,255,.10);border-radius:14px;padding:10px 14px}
   .pill .t{font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.8px}
@@ -73,7 +70,6 @@
   .forecast b{font-size:16px}
   .pos{color:#7FE0B4} .neg{color:#FFAB9B}
 
-  /* ===== Контент ===== */
   main{padding:18px 16px}
   h2{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink2);margin:22px 4px 10px;display:flex;justify-content:space-between;align-items:center}
   h2 .h-btns{display:flex;gap:6px}
@@ -81,8 +77,34 @@
     border:none;background:var(--card);color:var(--ink);border-radius:10px;
     padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);
   }
-
   .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+
+  /* Счета */
+  .acc{
+    background:var(--card);border-radius:var(--radius);padding:13px 14px;
+    margin-bottom:6px;box-shadow:var(--shadow);cursor:pointer;
+  }
+  .acc-top{display:flex;align-items:center;gap:10px}
+  .acc-name{flex:1;font-size:15px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .acc-sum{font-size:15px;font-weight:700;white-space:nowrap}
+  .acc-sub{font-size:12px;color:var(--ink2);margin-top:3px}
+  .acc-sub .pl-pos{color:var(--inc);font-weight:600}
+  .acc-sub .pl-neg{color:var(--exp);font-weight:600}
+  .acc-track{height:6px;border-radius:3px;background:var(--bg);margin-top:8px;overflow:hidden}
+  .acc-track div{height:100%;background:var(--sav);border-radius:3px;transition:width .4s}
+
+  /* Советы */
+  .tip{display:flex;gap:10px;font-size:14px;line-height:1.5;padding:8px 0;border-bottom:1px solid var(--line)}
+  .tip:first-child{padding-top:0}
+  .tip:last-child{border-bottom:none;padding-bottom:0}
+  .tip span:first-child{flex-shrink:0}
+
+  /* Пирог */
+  .pie-wrap{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+  .pie{width:118px;height:118px;border-radius:50%;flex-shrink:0}
+  .pie-legend{font-size:12px;color:var(--ink2);line-height:1.8;min-width:0}
+  .pie-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+  .pie-legend b{color:var(--ink)}
 
   /* График категорий + лимиты */
   .bar-row{margin-bottom:12px}
@@ -97,18 +119,19 @@
   .bar-fill.warn{background:#D98E2B}
   .bar-fill.bad{background:var(--exp)}
 
-  /* Годовой график */
+  /* Годовые графики */
   .ybars{display:flex;align-items:flex-end;gap:4px;height:150px;margin-bottom:6px}
   .ycol{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%;border-radius:6px;cursor:pointer}
   .ycol.cur{background:var(--bg)}
   .ycol i{display:block;width:42%;border-radius:3px 3px 0 0;min-height:2px}
   .ycol .yi{background:var(--inc)} .ycol .ye{background:var(--exp)}
+  .ycol .ys{width:60%}
   .ylabels{display:flex;gap:4px}
   .ylabels span{flex:1;text-align:center;font-size:10px;color:var(--ink2)}
-  .legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-top:10px}
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-top:10px;flex-wrap:wrap}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
   .yrows{margin-top:8px}
-  .yrow{display:flex;justify-content:space-between;font-size:14px;padding:9px 2px;border-bottom:1px solid var(--line)}
+  .yrow{display:flex;justify-content:space-between;font-size:14px;padding:9px 2px;border-bottom:1px solid var(--line);gap:10px}
   .yrow:last-child{border-bottom:none}
   .yrow b{font-weight:600}
 
@@ -151,13 +174,13 @@
   }
   .tx-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
   .tx-ico.inc{background:var(--inc-bg)} .tx-ico.exp{background:var(--exp-bg)}
-  .tx-ico.save,.tx-ico.take,.tx-ico.invest,.tx-ico.divest{background:var(--sav-bg)}
+  .tx-ico.save,.tx-ico.take,.tx-ico.invest,.tx-ico.divest,.tx-ico.move{background:var(--sav-bg)}
   .tx-info{flex:1;min-width:0}
   .tx-cat{font-size:15px;font-weight:600}
   .tx-note{font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tx-sum{font-size:15px;font-weight:700;white-space:nowrap}
   .tx-sum.inc,.tx-sum.take,.tx-sum.divest{color:var(--inc)}
-  .tx-sum.save,.tx-sum.invest{color:var(--sav)}
+  .tx-sum.save,.tx-sum.invest,.tx-sum.move{color:var(--sav)}
   .tx-sum.exp{color:var(--exp)}
   .tx-del{background:none;border:none;color:#C9D2CC;font-size:18px;padding:6px;cursor:pointer;flex-shrink:0}
   .empty{text-align:center;color:var(--ink2);padding:44px 20px;font-size:14px;line-height:1.6}
@@ -172,7 +195,7 @@
   }
   .fab:active{transform:translateX(-50%) scale(.96)}
 
-  /* ===== Модалки ===== */
+  /* Модалки */
   .sheet-wrap{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:100;align-items:flex-end}
   .sheet-wrap.open{display:flex}
   .sheet{
@@ -181,7 +204,7 @@
     max-height:92vh;overflow-y:auto;animation:up .25s ease;
   }
   @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
-  @media (prefers-reduced-motion: reduce){.sheet{animation:none}.bar-fill,.goal-track div{transition:none}}
+  @media (prefers-reduced-motion: reduce){.sheet{animation:none}.bar-fill,.acc-track div{transition:none}}
   .sheet h3{font-size:18px;margin-bottom:16px}
   .seg{display:flex;background:var(--bg);border-radius:14px;padding:4px;margin-bottom:16px}
   .seg button{
@@ -209,6 +232,8 @@
     padding:8px 14px;font-size:14px;cursor:pointer;color:var(--ink);
   }
   .chip.sel{background:var(--ink);border-color:var(--ink);color:var(--card)}
+  .chip.add{border-style:dashed;color:var(--ink2)}
+  .chip .chip-x{margin-left:6px;opacity:.5;padding:2px 4px}
   .save-btn{
     width:100%;background:var(--accent);color:#fff;border:none;border-radius:16px;
     padding:16px;font-size:16px;font-weight:600;margin-top:8px;cursor:pointer;
@@ -242,17 +267,13 @@
   <div class="mode-tabs">
     <button id="tabMonth" class="on">Месяц</button>
     <button id="tabYear">Год</button>
+    <button id="tabCap">Капитал</button>
   </div>
-  <div class="balance-label" id="balanceLabel">Итог за месяц</div>
-  <div class="balance num" id="balance">0 ₽</div>
-  <div class="wallet-line">Всего на руках: <b class="num" id="wallet">0 ₽</b></div>
-  <div class="savings-block" id="savingsBlock" role="button" aria-label="Настроить цель накоплений">
-    <div class="savings-line">🏦 Накопления: <b class="num" id="savingsTotal">0 ₽</b><span id="goalText"></span></div>
-    <div class="goal-track" id="goalTrack" style="display:none"><div id="goalBar"></div></div>
-  </div>
-  <div class="savings-block" id="investBlock" role="button" aria-label="Обновить стоимость инвестиций">
-    <div class="savings-line">📈 Инвестиции: <b class="num" id="investText">0 ₽</b><span id="investPL"></span></div>
-  </div>
+  <div class="balance-label">👛 На руках (переходит из месяца в месяц)</div>
+  <div class="balance num" id="wallet">0 ₽</div>
+  <div class="wallet-line" id="balanceLabel">Итог за месяц: <b class="num" id="balance">0 ₽</b></div>
+  <div class="savings-line">🏦 Накопления: <b class="num" id="savingsTotal">0 ₽</b></div>
+  <div class="savings-line">📈 Инвестиции: <b class="num" id="investText">0 ₽</b><span id="investPL"></span></div>
   <div class="totals">
     <div class="pill inc"><div class="t">Доходы</div><div class="v num" id="sumInc">0 ₽</div></div>
     <div class="pill exp"><div class="t">Расходы</div><div class="v num" id="sumExp">0 ₽</div></div>
@@ -261,8 +282,18 @@
 </header>
 
 <main>
-  <!-- ===== Вид «Месяц» ===== -->
   <div id="monthView">
+    <div id="dueBox"></div>
+
+    <h2>Быстрые траты <span class="h-btns"><button id="tplBtn">настроить</button></span></h2>
+    <div class="chips" id="tplChips" style="padding:0 2px 2px"></div>
+
+    <h2>Счета и копилки <span class="h-btns"><button id="addAccBtn">＋ счёт</button></span></h2>
+    <div id="accList"></div>
+
+    <h2>Советы</h2>
+    <div class="card" id="advice"></div>
+
     <h2>План на месяц <span class="h-btns"><button id="addPlanBtn">＋ платёж</button></span></h2>
     <div id="plansList"></div>
 
@@ -280,7 +311,19 @@
     <div id="history"></div>
   </div>
 
-  <!-- ===== Вид «Год» ===== -->
+  <div id="capView" style="display:none">
+    <h2>Что считаем вместе</h2>
+    <div class="chips" id="mixChips" style="padding:0 2px 4px"></div>
+    <h2>Итого выбранного</h2>
+    <div class="card" style="text-align:center">
+      <div class="balance-label" style="color:var(--ink2)">В складчине</div>
+      <div class="balance num" id="mixTotal" style="color:var(--ink);margin-bottom:0">0 ₽</div>
+    </div>
+    <h2>Из чего состоит</h2>
+    <div id="capList"></div>
+    <p class="hint">Тапни по счёту, чтобы изменить его. Инвестиции считаются по текущей стоимости, если она указана.</p>
+  </div>
+
   <div id="yearView" style="display:none">
     <h2>Доходы и расходы по месяцам</h2>
     <div class="card">
@@ -289,6 +332,15 @@
       <div class="legend">
         <span><i style="background:var(--inc)"></i>Доходы</span>
         <span><i style="background:var(--exp)"></i>Расходы</span>
+      </div>
+    </div>
+    <h2>Отложено по месяцам</h2>
+    <div class="card">
+      <div class="ybars" id="sbars" style="height:110px"></div>
+      <div class="ylabels"><span>Я</span><span>Ф</span><span>М</span><span>А</span><span>М</span><span>И</span><span>И</span><span>А</span><span>С</span><span>О</span><span>Н</span><span>Д</span></div>
+      <div class="legend">
+        <span><i style="background:var(--sav)"></i>Отложено в копилки и инвестиции</span>
+        <span><i style="background:var(--exp)"></i>Взято больше, чем отложено</span>
       </div>
     </div>
     <h2>Анализ года</h2>
@@ -302,12 +354,17 @@
     <button id="exportBtn">⬇ Бэкап</button>
     <button id="importBtn">⬆ Восстановить</button>
     <button id="csvBtn">📊 В Excel (CSV)</button>
+    <button id="baseCurBtn">💱 Валюта</button>
   </div>
   <input type="file" id="importFile" accept=".json" style="display:none">
   <p class="hint">Данные хранятся только на этом телефоне.<br>Время от времени делай бэкап в файл.</p>
 </main>
 
 <button class="fab" id="addBtn">＋ Добавить</button>
+<div id="snack" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));background:var(--ink);color:var(--card);padding:12px 18px;border-radius:14px;font-size:14px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.3);display:none;align-items:center;gap:14px">
+  <span>Запись удалена</span>
+  <button id="undoBtn" style="border:none;background:none;color:#7FE0B4;font-weight:700;font-size:14px;cursor:pointer">Вернуть</button>
+</div>
 
 <!-- Модалка операции -->
 <div class="sheet-wrap" id="sheetWrap">
@@ -319,16 +376,29 @@
       <button id="segSav">🏦 Копилка</button>
     </div>
     <div class="sav-hint" id="savHint">
-      <b>Отложить</b> — убрать деньги из месяца в накопления.<br>
-      <b>Взять</b> — достать из накоплений и потратить в этом месяце.
+      <b>Отложить / Вложить</b> — убрать деньги из «на руках» на счёт.<br>
+      <b>Взять / Вывести</b> — вернуть деньги со счёта в «на руках».
     </div>
     <div class="field">
-      <label for="amount">Сумма, ₽</label>
+      <label for="amount">Сумма</label>
       <input class="amount-in num" id="amount" type="text" inputmode="decimal" placeholder="0">
+      <div class="chips" id="curChips" style="margin-top:8px"></div>
+      <div id="rateField" style="display:none;margin-top:8px">
+        <label for="rate" style="display:block;font-size:12px;color:var(--ink2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px" id="rateLabel">Курс</label>
+        <input type="text" inputmode="decimal" class="num" id="rate" placeholder="Например: 92,5">
+      </div>
     </div>
     <div class="field">
       <label id="chipsLabel">Категория</label>
       <div class="chips" id="chips"></div>
+    </div>
+    <div class="field" id="accField" style="display:none">
+      <label id="accLabel">Счёт</label>
+      <div class="chips" id="accChips"></div>
+    </div>
+    <div class="field" id="moveField" style="display:none">
+      <label>Куда</label>
+      <div class="chips" id="moveChips"></div>
     </div>
     <div class="field">
       <label for="note">Заметка (необязательно)</label>
@@ -341,6 +411,29 @@
     <button class="save-btn" id="saveBtn">Записать</button>
     <button class="danger-btn" id="txDeleteBtn">Удалить запись</button>
     <button class="cancel-btn" id="cancelBtn">Отмена</button>
+  </div>
+</div>
+
+<!-- Модалка счёта -->
+<div class="sheet-wrap" id="accWrap">
+  <div class="sheet">
+    <h3 id="accTitle">Новый счёт</h3>
+    <div class="seg" id="accKindSeg">
+      <button id="akSav" class="on-sav">🏦 Накопления</button>
+      <button id="akInv">📈 Инвестиции</button>
+    </div>
+    <div class="field">
+      <label for="accName">Название</label>
+      <input type="text" id="accName" placeholder="Отпуск, вклад, брокер…">
+    </div>
+    <div class="field">
+      <label id="accExtraLabel" for="accExtra">Цель, ₽ (необязательно)</label>
+      <input class="amount-in num" id="accExtra" type="text" inputmode="decimal" placeholder="0">
+    </div>
+    <p class="hint" style="text-align:left;margin:0 0 8px" id="accHint"></p>
+    <button class="save-btn" id="accSaveBtn">Сохранить счёт</button>
+    <button class="danger-btn" id="accDeleteBtn">Удалить счёт</button>
+    <button class="cancel-btn" id="accCancelBtn">Отмена</button>
   </div>
 </div>
 
@@ -364,8 +457,50 @@
       <label for="pday">Число месяца (1–31)</label>
       <input type="number" id="pday" min="1" max="31" placeholder="Например: 5">
     </div>
+    <div class="field">
+      <label>Если выпадает на субботу или воскресенье</label>
+      <div class="chips" id="shiftChips"></div>
+    </div>
     <button class="save-btn" id="planSaveBtn">Сохранить план</button>
     <button class="cancel-btn" id="planCancelBtn">Отмена</button>
+  </div>
+</div>
+
+<!-- Модалка шаблонов -->
+<div class="sheet-wrap" id="tplWrap">
+  <div class="sheet">
+    <h3>Быстрые траты</h3>
+    <p class="hint" style="text-align:left;margin:0 0 12px">Шаблон — это трата, которую записываешь одним тапом: кофе, обед, проезд.</p>
+    <div id="tplList" style="margin-bottom:14px"></div>
+    <div class="field">
+      <label for="tplName">Название</label>
+      <input type="text" id="tplName" placeholder="Кофе у дома">
+    </div>
+    <div class="field">
+      <label for="tplSum">Сумма</label>
+      <input class="amount-in num" id="tplSum" type="text" inputmode="decimal" placeholder="0">
+    </div>
+    <div class="field">
+      <label>Категория</label>
+      <div class="chips" id="tplCatChips"></div>
+    </div>
+    <div class="field">
+      <label>Откуда деньги</label>
+      <div class="chips" id="tplSrcChips"></div>
+    </div>
+    <button class="save-btn" id="tplSaveBtn">Добавить шаблон</button>
+    <button class="cancel-btn" id="tplCancelBtn">Закрыть</button>
+  </div>
+</div>
+
+<!-- Модалка базовой валюты -->
+<div class="sheet-wrap" id="baseCurWrap">
+  <div class="sheet">
+    <h3>Основная валюта</h3>
+    <p class="hint" style="text-align:left;margin:0 0 12px">В ней ведётся весь учёт и показываются суммы. Записанные числа при смене не пересчитываются — меняется только значок.</p>
+    <div class="chips" id="baseCurChips" style="margin-bottom:8px"></div>
+    <button class="save-btn" id="baseCurSaveBtn">Сохранить</button>
+    <button class="cancel-btn" id="baseCurCancelBtn">Отмена</button>
   </div>
 </div>
 
@@ -380,40 +515,11 @@
   </div>
 </div>
 
-<!-- Модалка цели -->
-<div class="sheet-wrap" id="goalWrap">
-  <div class="sheet">
-    <h3>Цель накоплений</h3>
-    <div class="field">
-      <label for="goalSum">Сколько хочешь накопить, ₽</label>
-      <input class="amount-in num" id="goalSum" type="text" inputmode="decimal" placeholder="Например: 100 000">
-    </div>
-    <p class="hint" style="text-align:left;margin:0 0 8px">Поставь 0, чтобы убрать цель.</p>
-    <button class="save-btn" id="goalSaveBtn">Сохранить цель</button>
-    <button class="cancel-btn" id="goalCancelBtn">Отмена</button>
-  </div>
-</div>
-
-<!-- Модалка стоимости инвестиций -->
-<div class="sheet-wrap" id="investWrap">
-  <div class="sheet">
-    <h3>Инвестиции сейчас</h3>
-    <p class="hint" style="text-align:left;margin:0 0 14px" id="investInfo"></p>
-    <div class="field">
-      <label for="investSum">Сколько портфель стоит сегодня, ₽</label>
-      <input class="amount-in num" id="investSum" type="text" inputmode="decimal" placeholder="Например: 120 000">
-    </div>
-    <p class="hint" style="text-align:left;margin:0 0 8px">Обновляй время от времени — приложение само посчитает прибыль или убыток. Поставь 0, чтобы скрыть.</p>
-    <button class="save-btn" id="investSaveBtn">Сохранить</button>
-    <button class="cancel-btn" id="investCancelBtn">Отмена</button>
-  </div>
-</div>
-
 <script>
 'use strict';
 // ============ ДАННЫЕ ============
 const KEY = 'kassa_v1';
-const CATS = {
+const BASE_CATS = {
   exp: [
     {n:'Еда', i:'🍞'}, {n:'Кафе', i:'☕️'}, {n:'Транспорт', i:'🚌'},
     {n:'Жильё', i:'🏠'}, {n:'Связь', i:'📱'}, {n:'Здоровье', i:'💊'},
@@ -422,55 +528,122 @@ const CATS = {
   inc: [
     {n:'Зарплата', i:'💼'}, {n:'Подработка', i:'🛠'},
     {n:'Подарок', i:'🎁'}, {n:'Возврат', i:'↩️'}, {n:'Другое', i:'💰'}
-  ],
-  sav: [
-    {n:'Отложить', i:'🏦', t:'save'}, {n:'Взять из накоплений', i:'🏧', t:'take'},
-    {n:'Вложить в инвестиции', i:'📈', t:'invest'}, {n:'Вывести из инвестиций', i:'📉', t:'divest'}
   ]
 };
+const SAV_ACTIONS = [
+  {n:'Отложить', i:'🏦', t:'save', kind:'sav'},
+  {n:'Взять', i:'🏧', t:'take', kind:'sav'},
+  {n:'Вложить', i:'📈', t:'invest', kind:'inv'},
+  {n:'Вывести', i:'📉', t:'divest', kind:'inv'},
+  {n:'Перевод', i:'🔁', t:'move', kind:'sav'}
+];
+const KIND_OF = {save:'sav', take:'sav', invest:'inv', divest:'inv', move:'sav'};
+const PIE_COLORS = ['#C4452F','#D98E2B','#0E8A5F','#1F5FA8','#7B4FA3','#B03A6B','#4E8076','#8C6D46','#5C6B63'];
 
-let DB = load();        // {txs, plans, budgets, goal}
-let viewYear, viewMonth;
-let viewMode = 'month'; // month | year
-let formType = 'exp', formCat = CATS.exp[0].n;
-let planType = 'exp';
-let editingId = null;
-let searchQ = '';
-
-function load(){
-  try {
-    const raw = JSON.parse(localStorage.getItem(KEY));
-    if (Array.isArray(raw)) return {txs: raw, plans: [], budgets:{}, goal:0, investValue:0};
-    if (raw && Array.isArray(raw.txs))
-      return {txs: raw.txs, plans: raw.plans||[], budgets: raw.budgets||{}, goal: raw.goal||0, investValue: raw.investValue||0};
-  } catch(e){}
-  return {txs: [], plans: [], budgets:{}, goal:0, investValue:0};
-}
-function save(){
-  try { localStorage.setItem(KEY, JSON.stringify(DB)); }
-  catch(e){ /* инкогнито или нет места — работаем в памяти */ }
-}
 const uid = () => Date.now()+'_'+Math.random().toString(36).slice(2,7);
 const $ = id => document.getElementById(id);
 
-// ============ ФОРМАТ ============
-const fmt = n => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n) + ' ₽';
+let DB = load();
+let viewYear, viewMonth, viewMode = 'month';
+let formType = 'exp', formCat = BASE_CATS.exp[0].n, formAcc = '';
+let planType = 'exp', editingId = null, editingAccId = null, accKind = 'sav';
+let searchQ = '';
+
+const CURRENCIES = ['₽','$','€'];
+
+function load(){
+  let db = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
+            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}}};
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY));
+    if (Array.isArray(raw)) db.txs = raw;
+    else if (raw && Array.isArray(raw.txs)){
+      db.txs = raw.txs;
+      db.plans = raw.plans||[];
+      db.budgets = raw.budgets||{};
+      db.customCats = raw.customCats||{exp:[],inc:[]};
+      db.accounts = raw.accounts||[];
+      db.templates = raw.templates||[];
+      db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}}, raw.settings||{});
+      db.settings.mix = Object.assign({hand:true,sav:true,inv:true}, db.settings.mix||{});
+      db.settings.rates = Object.assign({'$':90,'€':100}, db.settings.rates||{});
+      db._oldGoal = raw.goal||0;
+      db._oldInvestValue = raw.investValue||0;
+    }
+  } catch(e){}
+  migrate(db);
+  return db;
+}
+function migrate(db){
+  let sav = db.accounts.find(a=>a.kind==='sav');
+  if (!sav){ sav = {id:uid(), name:'Накопления', kind:'sav', goal: db._oldGoal||0, value:0}; db.accounts.push(sav); }
+  let inv = db.accounts.find(a=>a.kind==='inv');
+  if (!inv){ inv = {id:uid(), name:'Инвестиции', kind:'inv', goal:0, value: db._oldInvestValue||0}; db.accounts.push(inv); }
+  db.txs.forEach(t => {
+    if (KIND_OF[t.type] && !t.acc) t.acc = (KIND_OF[t.type]==='sav' ? sav : inv).id;
+  });
+  delete db._oldGoal; delete db._oldInvestValue;
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){}
+}
+
+// ============ ФОРМАТ И СЧЁТЧИКИ ============
+const fmt = n => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n) + ' ' + DB.settings.cur;
 const signFmt = n => (n>0?'+':'') + fmt(n);
 const MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const parseSum = v => parseFloat(String(v).replace(',','.').replace(/\s/g,''));
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// влияние операции на «на руках»
+const flow = t => {
+  if (t.type==='move') return 0;
+  if (t.type==='inc') return t.dst ? 0 : t.sum;
+  if (t.type==='exp') return t.src ? 0 : -t.sum;
+  return (t.type==='take'||t.type==='divest') ? t.sum : -t.sum;
+};
+const getCats = type => BASE_CATS[type].concat(DB.customCats[type]||[]);
+const accById = id => DB.accounts.find(a=>a.id===id);
+// баланс счёта: переводы + доходы прямо на счёт − расходы прямо со счёта
+const accBalance = acc => DB.txs.reduce((s,t)=>{
+  if (t.type==='move'){
+    if (t.acc===acc.id) return s - t.sum;
+    if (t.to===acc.id)  return s + t.sum;
+    return s;
+  }
+  if (t.acc===acc.id) return s + ((t.type==='save'||t.type==='invest') ? t.sum : -t.sum);
+  if (t.type==='inc' && t.dst===acc.id) return s + t.sum;
+  if (t.type==='exp' && t.src===acc.id) return s - t.sum;
+  return s;
+}, 0);
+const kindTotal = kind => DB.accounts.filter(a=>a.kind===kind).reduce((s,a)=>s+accBalance(a),0);
+// отложено за набор операций (в копилки/инвестиции минус взятое)
+const putOf = list => list.reduce((s,t)=> s + (t.type==='move'?0 : t.type==='save'||t.type==='invest'?t.sum : t.type==='take'||t.type==='divest'?-t.sum : 0), 0);
+
 function txIcon(t){
-  if (t.type==='save') return '🏦';
-  if (t.type==='take') return '🏧';
-  if (t.type==='invest') return '📈';
-  if (t.type==='divest') return '📉';
-  return (CATS[t.type].find(c=>c.n===t.cat)||{i: t.type==='inc'?'💰':'📦'}).i;
+  if (KIND_OF[t.type]) return {save:'🏦',take:'🏧',invest:'📈',divest:'📉',move:'🔁'}[t.type];
+  return (getCats(t.type).find(c=>c.n===t.cat)||{i: t.type==='inc'?'💰':'📦'}).i;
 }
 function txLabel(t){
-  if (t.type==='save') return 'В накопления';
-  if (t.type==='take') return 'Из накоплений';
-  if (t.type==='invest') return 'В инвестиции';
-  if (t.type==='divest') return 'Из инвестиций';
+  if (t.type==='move'){
+    const a = accById(t.acc), b = accById(t.to);
+    return '«'+(a?a.name:'?')+'» → «'+(b?b.name:'?')+'»';
+  }
+  if (KIND_OF[t.type]){
+    const a = accById(t.acc);
+    const verb = {save:'В', take:'Из', invest:'В', divest:'Из'}[t.type];
+    return verb + ' «' + (a ? a.name : 'счёт удалён') + '»';
+  }
   return t.cat;
+}
+function txVia(t){
+  const parts = [];
+  if (t.fx) parts.push(t.fx.sum + ' ' + t.fx.cur + ' по ' + t.fx.rate);
+  if (t.type==='exp' && t.src){ const a=accById(t.src); parts.push('из «'+(a?a.name:'?')+'»'); }
+  if (t.type==='inc' && t.dst){ const a=accById(t.dst); parts.push('в «'+(a?a.name:'?')+'»'); }
+  return parts.join(' · ');
 }
 function dayLabel(iso){
   const d = new Date(iso+'T00:00');
@@ -480,45 +653,62 @@ function dayLabel(iso){
   if (diff===1) return 'Вчера';
   return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
 }
-const esc = s => String(s).replace(/[&<>"']/g, c =>
-  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const flow = t => (t.type==='inc'||t.type==='take'||t.type==='divest') ? t.sum : -t.sum;
-const savingsTotal = () => DB.txs.reduce((s,t)=> s + (t.type==='save'?t.sum : t.type==='take'?-t.sum : 0), 0);
-const investTotal  = () => DB.txs.reduce((s,t)=> s + (t.type==='invest'?t.sum : t.type==='divest'?-t.sum : 0), 0);
+const monthTx = (y,m) => DB.txs.filter(t => {
+  const d = new Date(t.date+'T00:00');
+  return d.getFullYear()===y && d.getMonth()===m;
+});
+// фактическая дата планового платежа в конкретном месяце (с переносом с выходных)
+function effDate(p, y, m){
+  const dim = new Date(y, m+1, 0).getDate();
+  const dt = new Date(y, m, Math.min(p.day, dim));
+  const wd = dt.getDay(); // 0=вс, 6=сб
+  if (p.shift==='before'){
+    if (wd===6) dt.setDate(dt.getDate()-1);
+    else if (wd===0) dt.setDate(dt.getDate()-2);
+  } else if (p.shift==='after'){
+    if (wd===6) dt.setDate(dt.getDate()+2);
+    else if (wd===0) dt.setDate(dt.getDate()+1);
+  }
+  return dt;
+}
+const WD_RU = ['вс','пн','вт','ср','чт','пт','сб'];
+// планы, которые по факту ещё впереди в текущем месяце
+function plansLeft(now){
+  return DB.plans.filter(p => {
+    const e = effDate(p, now.getFullYear(), now.getMonth());
+    return e.getMonth()===now.getMonth() && e.getDate() >= now.getDate();
+  });
+}
 
 // ============ ОТРИСОВКА ============
 function render(){
   const isYear = viewMode==='year';
-  $('monthView').style.display = isYear ? 'none' : 'block';
+  const isCap  = viewMode==='cap';
+  $('monthView').style.display = (!isYear && !isCap) ? 'block' : 'none';
   $('yearView').style.display  = isYear ? 'block' : 'none';
-  $('tabMonth').className = isYear ? '' : 'on';
+  $('capView').style.display   = isCap ? 'block' : 'none';
+  $('tabMonth').className = (!isYear && !isCap) ? 'on' : '';
   $('tabYear').className  = isYear ? 'on' : '';
-  $('monthName').textContent = isYear ? viewYear : MONTHS[viewMonth]+' '+viewYear;
-  $('balanceLabel').textContent = isYear ? 'Итог за год' : 'Итог за месяц';
+  $('tabCap').className   = isCap ? 'on' : '';
+  $('monthName').textContent = isCap ? 'Мой капитал' : (isYear ? viewYear : MONTHS[viewMonth]+' '+viewYear);
+  $('prevM').style.visibility = isCap ? 'hidden' : 'visible';
+  $('nextM').style.visibility = isCap ? 'hidden' : 'visible';
 
-  // Общие цифры
-  const wallet = DB.txs.reduce((s,t)=>s+flow(t),0);
-  $('wallet').textContent = fmt(wallet);
-  const sav = savingsTotal();
-  $('savingsTotal').textContent = fmt(sav);
-  if (DB.goal > 0){
-    const pct = Math.min(100, Math.round(sav/DB.goal*100));
-    $('goalText').textContent = ' / цель ' + fmt(DB.goal) + ' · ' + pct + '%';
-    $('goalTrack').style.display = 'block';
-    $('goalBar').style.width = pct + '%';
+  $('wallet').textContent = fmt(DB.txs.reduce((s,t)=>s+flow(t),0));
+  $('savingsTotal').textContent = fmt(kindTotal('sav'));
+
+  const invAccs = DB.accounts.filter(a=>a.kind==='inv');
+  const invested = kindTotal('inv');
+  const anyValue = invAccs.some(a=>a.value>0);
+  if (anyValue && invested>0){
+    const cur = invAccs.reduce((s,a)=> s + (a.value>0 ? a.value : accBalance(a)), 0);
+    const pl = cur - invested;
+    $('investText').textContent = fmt(cur);
+    $('investPL').innerHTML = ' · вложено '+fmt(invested)+
+      ' · <span class="'+(pl>=0?'pos':'neg')+' num">'+signFmt(pl)+'</span>';
   } else {
-    $('goalText').textContent = ' · задать цель';
-    $('goalTrack').style.display = 'none';
-  }
-  const inv = investTotal();
-  if (DB.investValue > 0 && inv > 0){
-    const pl = DB.investValue - inv;
-    $('investText').textContent = fmt(DB.investValue);
-    $('investPL').innerHTML = ' · вложено ' + fmt(inv) +
-      ' · <span class="' + (pl>=0?'pos':'neg') + ' num">' + signFmt(pl) + '</span>';
-  } else {
-    $('investText').textContent = fmt(inv);
-    $('investPL').textContent = inv > 0 ? ' · указать текущую стоимость' : '';
+    $('investText').textContent = fmt(invested);
+    $('investPL').textContent = '';
   }
 
   const scope = DB.txs.filter(t => {
@@ -529,17 +719,275 @@ function render(){
   const exp = scope.filter(t=>t.type==='exp').reduce((s,t)=>s+t.sum,0);
   $('sumInc').textContent = fmt(inc);
   $('sumExp').textContent = fmt(exp);
-  $('balance').textContent = signFmt(scope.reduce((s,t)=>s+flow(t),0));
+  $('balanceLabel').innerHTML = (isYear ? 'Итог за год' : 'Итог за месяц') +
+    ' (доходы − расходы): <b class="num">' + signFmt(inc - exp) + '</b>';
 
-  if (isYear){
+  if (isCap){
+    $('forecast').style.display='none';
+    renderCapital();
+  } else if (isYear){
     $('forecast').style.display='none';
     renderYear();
   } else {
-    renderForecast(scope.reduce((s,t)=>s+flow(t),0));
+    renderForecast(inc - exp);
+    renderDue();
+    renderTemplates();
+    renderAccounts();
+    renderAdvice(scope, inc, exp);
     renderSixMonths();
     renderPlans();
     renderChart(scope);
     renderHistory(scope);
+  }
+}
+
+// ---- Капитал ----
+function renderCapital(){
+  const mix = DB.settings.mix;
+  const groups = [
+    {k:'hand', i:'👛', n:'На руках'},
+    {k:'sav',  i:'🏦', n:'Накопления'},
+    {k:'inv',  i:'📈', n:'Инвестиции'}
+  ];
+  $('mixChips').innerHTML = groups.map(g =>
+    `<button class="chip ${mix[g.k]?'sel':''}" data-k="${g.k}">${g.i} ${g.n}</button>`).join('');
+  $('mixChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    mix[ch.dataset.k] = !mix[ch.dataset.k];
+    save(); render();
+  });
+
+  const hand = DB.txs.reduce((s,t)=>s+flow(t),0);
+  const invVal = a => a.value>0 ? a.value : accBalance(a);
+  let total = 0;
+  if (mix.hand) total += hand;
+  if (mix.sav) DB.accounts.filter(a=>a.kind==='sav').forEach(a => total += accBalance(a));
+  if (mix.inv) DB.accounts.filter(a=>a.kind==='inv').forEach(a => total += invVal(a));
+  $('mixTotal').textContent = fmt(total);
+
+  const dim = on => on ? '' : 'opacity:.35';
+  let html = `<div class="acc" style="${dim(mix.hand)};cursor:default">
+    <div class="acc-top"><span>👛</span><span class="acc-name">На руках</span><span class="acc-sum num">${fmt(hand)}</span></div>
+    <div class="acc-sub">все доходы минус траты и разложенное по счетам</div>
+  </div>`;
+  DB.accounts.forEach(a => {
+    const on = a.kind==='sav' ? mix.sav : mix.inv;
+    const bal = accBalance(a);
+    let sum = fmt(bal), sub = a.kind==='sav' ? 'копилка' : 'инвестиции';
+    if (a.kind==='inv' && a.value>0){
+      const pl = a.value - bal;
+      sum = fmt(a.value);
+      sub = `вложено ${fmt(bal)} · <span class="${pl>=0?'pl-pos':'pl-neg'} num">${signFmt(pl)}</span>`;
+    } else if (a.kind==='sav' && a.goal>0){
+      sub = `цель ${fmt(a.goal)} · ${Math.min(100,Math.max(0,Math.round(bal/a.goal*100)))}%`;
+    }
+    html += `<div class="acc" data-id="${a.id}" style="${dim(on)}">
+      <div class="acc-top"><span>${a.kind==='sav'?'🏦':'📈'}</span><span class="acc-name">${esc(a.name)}</span><span class="acc-sum num">${sum}</span></div>
+      <div class="acc-sub">${sub}</div>
+    </div>`;
+  });
+  $('capList').innerHTML = html;
+  $('capList').querySelectorAll('.acc[data-id]').forEach(el =>
+    el.onclick = () => openAccSheet(accById(el.dataset.id)));
+}
+
+// ---- К записи по плану ----
+function renderDue(){
+  const box = $('dueBox');
+  const now = new Date();
+  const ym = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const due = DB.plans.filter(p => {
+    if (p.lastDone === ym) return false;
+    const e = effDate(p, now.getFullYear(), now.getMonth());
+    return e <= now;
+  });
+  if (!due.length){ box.innerHTML=''; return; }
+  box.innerHTML = `<h2>По плану — пора записать</h2>` + due.map(p => {
+    const e = effDate(p, now.getFullYear(), now.getMonth());
+    return `<div class="plan">
+      <div class="plan-day"><b class="num">${e.getDate()}</b><span>${WD_RU[e.getDay()]}</span></div>
+      <div class="plan-info">
+        <div class="plan-name">${esc(p.name)}</div>
+        <div class="plan-sub">${p.type==='inc'?'доход':'расход'} по плану</div>
+      </div>
+      <div class="plan-sum num ${p.type}">${p.type==='inc'?'+':'−'}${fmt(p.sum)}</div>
+      <button class="h-due-ok chip" data-id="${p.id}" style="padding:6px 12px">✓</button>
+      <button class="tx-del" data-id="${p.id}" aria-label="Пропустить">✕</button>
+    </div>`;}).join('');
+  box.querySelectorAll('.h-due-ok').forEach(b => b.onclick = () => {
+    const p = DB.plans.find(x=>x.id===b.dataset.id);
+    const now = new Date();
+    const e = effDate(p, now.getFullYear(), now.getMonth());
+    DB.txs.push({ id: uid(), type: p.type, sum: p.sum,
+      cat: p.type==='inc' ? 'Зарплата' : 'Другое',
+      note: p.name + ' (по плану)',
+      date: e.toISOString().slice(0,10) });
+    p.lastDone = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    save(); render();
+  });
+  box.querySelectorAll('.tx-del').forEach(b => b.onclick = () => {
+    const p = DB.plans.find(x=>x.id===b.dataset.id);
+    p.lastDone = ym;
+    save(); render();
+  });
+}
+
+// ---- Быстрые траты ----
+function renderTemplates(){
+  const box = $('tplChips');
+  if (!DB.templates.length){
+    box.innerHTML = `<div class="plans-empty" style="width:100%;padding:6px 0">Нажми «настроить» и добавь частые траты — будут записываться одним тапом.</div>`;
+    return;
+  }
+  box.innerHTML = DB.templates.map(t =>
+    `<button class="chip" data-id="${t.id}">${esc(t.name)} · <span class="num">${fmt(t.sum)}</span></button>`).join('');
+  box.querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    const t = DB.templates.find(x=>x.id===ch.dataset.id);
+    if (!t) return;
+    const rec = { id: uid(), type:'exp', sum:t.sum, cat:t.cat,
+      note:'', date: new Date().toISOString().slice(0,10) };
+    if (t.src && accById(t.src)) rec.src = t.src;
+    DB.txs.push(rec);
+    save();
+    const now = new Date();
+    viewYear = now.getFullYear(); viewMonth = now.getMonth();
+    render();
+  });
+}
+
+// ---- Счета ----
+function renderAccounts(){
+  const box = $('accList');
+  box.innerHTML = DB.accounts.map(a => {
+    const bal = accBalance(a);
+    let sub = '', track = '', sum = fmt(bal);
+    if (a.kind==='sav'){
+      if (a.goal>0){
+        const pct = Math.min(100, Math.max(0, Math.round(bal/a.goal*100)));
+        sub = `<div class="acc-sub">цель ${fmt(a.goal)} · ${pct}%</div>`;
+        track = `<div class="acc-track"><div style="width:${pct}%"></div></div>`;
+      }
+    } else {
+      if (a.value>0){
+        const pl = a.value - bal;
+        sum = fmt(a.value);
+        sub = `<div class="acc-sub">вложено ${fmt(bal)} · <span class="${pl>=0?'pl-pos':'pl-neg'} num">${signFmt(pl)}</span></div>`;
+      } else if (bal>0){
+        sub = `<div class="acc-sub">тапни, чтобы указать текущую стоимость</div>`;
+      }
+    }
+    return `<div class="acc" data-id="${a.id}">
+      <div class="acc-top">
+        <span>${a.kind==='sav'?'🏦':'📈'}</span>
+        <span class="acc-name">${esc(a.name)}</span>
+        <span class="acc-sum num">${sum}</span>
+      </div>${sub}${track}
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.acc').forEach(el => el.onclick = () => openAccSheet(accById(el.dataset.id)));
+}
+
+// ---- Советы ----
+function renderAdvice(scope, inc, exp){
+  const tips = [];
+  const put = putOf(scope);
+  const now = new Date();
+  const isCurrent = viewYear===now.getFullYear() && viewMonth===now.getMonth();
+
+  if (exp > inc && inc > 0)
+    tips.push(['⚠️', `Расходы за месяц (${fmt(exp)}) больше доходов (${fmt(inc)}). Разница ${fmt(exp-inc)}.`]);
+  if (inc > 0){
+    const rate = Math.round(put/inc*100);
+    if (rate >= 20) tips.push(['✅', `Отложено ${rate}% дохода за месяц — отличный темп.`]);
+    else if (rate > 0) tips.push(['💡', `Отложено ${rate}% дохода. Обычно советуют 10–20%, попробуй чуть больше.`]);
+    else if (inc > exp && put <= 0) tips.push(['💡', `Месяц в плюсе на ${fmt(inc-exp)}, но в копилки ничего не ушло. Может, отложить часть?`]);
+  }
+
+  // подушка безопасности: накопления / средний расход за последние 3 месяца с тратами
+  const savT = kindTotal('sav');
+  let sumE = 0, nE = 0, y = viewYear, m = viewMonth;
+  for (let k=0; k<6 && nE<3; k++){
+    const e = monthTx(y,m).filter(t=>t.type==='exp').reduce((s,t)=>s+t.sum,0);
+    if (e>0){ sumE += e; nE++; }
+    m--; if (m<0){ m=11; y--; }
+  }
+  if (nE>0 && savT>0){
+    const months = savT/(sumE/nE);
+    const mtxt = months>=1 ? Math.floor(months)+' мес' : 'меньше месяца';
+    if (months >= 6) tips.push(['🛡', `Подушка безопасности — на ${mtxt} жизни. Надёжно.`]);
+    else if (months >= 3) tips.push(['🛡', `Подушки хватит на ${mtxt}. Норма 3–6 месяцев — ты в ней.`]);
+    else tips.push(['🛡', `Подушки хватит на ${mtxt} при текущих тратах. Ориентир — 3–6 месяцев расходов в накоплениях.`]);
+  }
+
+  // лимиты
+  const spent = {};
+  scope.filter(t=>t.type==='exp').forEach(t => spent[t.cat]=(spent[t.cat]||0)+t.sum);
+  Object.entries(DB.budgets).forEach(([c,lim])=>{
+    const s = spent[c]||0;
+    const pct = Math.round(s/lim*100);
+    if (pct>=100) tips.push(['🚨', `Лимит по «${c}» превышен: ${fmt(s)} из ${fmt(lim)}.`]);
+    else if (pct>=80) tips.push(['⏳', `По «${c}» израсходовано ${pct}% лимита.`]);
+  });
+
+  // рост категорий к прошлому месяцу
+  let py = viewYear, pm = viewMonth-1;
+  if (pm<0){ pm=11; py--; }
+  const prevSpent = {};
+  monthTx(py,pm).filter(t=>t.type==='exp').forEach(t => prevSpent[t.cat]=(prevSpent[t.cat]||0)+t.sum);
+  Object.entries(spent)
+    .filter(([c,s]) => prevSpent[c]>0 && s > prevSpent[c]*1.3 && s - prevSpent[c] >= 1000)
+    .sort((a,b)=>(b[1]-prevSpent[b[0]])-(a[1]-prevSpent[a[0]]))
+    .slice(0,2)
+    .forEach(([c,s]) => tips.push(['📈', `На «${c}» уходит на ${Math.round((s/prevSpent[c]-1)*100)}% больше, чем в прошлом месяце (${fmt(s)} против ${fmt(prevSpent[c])}).`]));
+
+  // прогноз в минус
+  if (isCurrent && DB.plans.length){
+    const pi = DB.plans.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
+    const pe = DB.plans.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
+    const net = pi - pe;
+    const left = plansLeft(now);
+    let run = DB.txs.reduce((s,t)=>s+flow(t),0)
+      + left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0)
+      - left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
+    let mm = now.getMonth(), yy = now.getFullYear();
+    for (let k=1; k<=6; k++){
+      mm++; if (mm>11){ mm=0; yy++; }
+      run += net;
+      if (run < 0){
+        tips.push(['🔻', `По плану в ${MONTHS[mm]}е ${yy} деньги «на руках» уйдут в минус (${fmt(run)}). Проверь плановые платежи.`]);
+        break;
+      }
+    }
+  }
+
+  $('advice').innerHTML = tips.length
+    ? tips.slice(0,5).map(([i,t]) => `<div class="tip"><span>${i}</span><span>${t}</span></div>`).join('')
+    : `<div class="plans-empty">Пока всё ровно. Веди учёт — советы появятся, когда будет что подметить.</div>`;
+}
+
+// ---- Прогноз ----
+function renderForecast(bal){
+  const box = $('forecast');
+  const now = new Date();
+  const isCurrent = viewYear===now.getFullYear() && viewMonth===now.getMonth();
+  const isFuture  = viewYear>now.getFullYear() ||
+                    (viewYear===now.getFullYear() && viewMonth>now.getMonth());
+  if (!DB.plans.length || (!isCurrent && !isFuture)){ box.style.display='none'; return; }
+  box.style.display='block';
+  if (isCurrent){
+    const left = plansLeft(now);
+    const li = left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
+    const le = left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
+    const end = bal + li - le;
+    box.innerHTML =
+      `До конца месяца по плану: <span class="pos num">+${fmt(li)}</span> и <span class="neg num">−${fmt(le)}</span><br>` +
+      `Прогноз итога месяца: <b class="num ${end>=0?'pos':'neg'}">${signFmt(end)}</b>`;
+  } else {
+    const pi = DB.plans.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
+    const pe = DB.plans.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
+    const end = pi - pe;
+    box.innerHTML =
+      `План: <span class="pos num">+${fmt(pi)}</span> доходов, <span class="neg num">−${fmt(pe)}</span> расходов<br>` +
+      `Ожидаемый итог месяца: <b class="num ${end>=0?'pos':'neg'}">${signFmt(end)}</b>`;
   }
 }
 
@@ -554,9 +1002,7 @@ function renderSixMonths(){
   const pi = DB.plans.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
   const pe = DB.plans.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
   const net = pi - pe;
-  // старт: всё на руках сейчас + что осталось по плану до конца текущего месяца
-  const today = now.getDate();
-  const left = DB.plans.filter(p=>p.day>=today);
+  const left = plansLeft(now);
   const li = left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
   const le = left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
   let run = DB.txs.reduce((s,t)=>s+flow(t),0) + li - le;
@@ -568,55 +1014,33 @@ function renderSixMonths(){
     rows += `<div class="yrow"><b style="text-transform:capitalize">${MONTHS[m]} ${y}</b><span class="num" style="font-weight:600;color:${run<0?'var(--exp)':'inherit'}">${fmt(run)}</span></div>`;
   }
   box.innerHTML =
-    `<div class="plans-empty" style="padding:0 0 10px;text-align:left">Сколько будет на руках, если каждый месяц по плану: <b class="num">+${fmt(pi)}</b> доходов и <b class="num">−${fmt(pe)}</b> расходов (итог ${signFmt(net)}/мес):</div>` +
+    `<div class="plans-empty" style="padding:0 0 10px;text-align:left">Деньги «на руках», если каждый месяц по плану: <b class="num">+${fmt(pi)}</b> доходов и <b class="num">−${fmt(pe)}</b> расходов (итог ${signFmt(net)}/мес):</div>` +
     `<div class="yrows">${rows}</div>`;
-}
-
-// ---- Прогноз ----
-function renderForecast(bal){
-  const box = $('forecast');
-  const now = new Date();
-  const isCurrent = viewYear===now.getFullYear() && viewMonth===now.getMonth();
-  const isFuture  = viewYear>now.getFullYear() ||
-                    (viewYear===now.getFullYear() && viewMonth>now.getMonth());
-  if (!DB.plans.length || (!isCurrent && !isFuture)){ box.style.display='none'; return; }
-  box.style.display='block';
-  if (isCurrent){
-    const today = now.getDate();
-    const left = DB.plans.filter(p=>p.day>=today);
-    const li = left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
-    const le = left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
-    const end = bal + li - le;
-    box.innerHTML =
-      `До конца месяца по плану: <span class="pos num">+${fmt(li)}</span> и <span class="neg num">−${fmt(le)}</span><br>` +
-      `Прогноз на конец месяца: <b class="num ${end>=0?'pos':'neg'}">${signFmt(end)}</b>`;
-  } else {
-    const pi = DB.plans.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
-    const pe = DB.plans.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
-    const end = pi - pe;
-    box.innerHTML =
-      `План: <span class="pos num">+${fmt(pi)}</span> доходов, <span class="neg num">−${fmt(pe)}</span> расходов<br>` +
-      `Ожидаемый итог месяца: <b class="num ${end>=0?'pos':'neg'}">${signFmt(end)}</b>`;
-  }
 }
 
 // ---- Плановые платежи ----
 function renderPlans(){
   const box = $('plansList');
   if (!DB.plans.length){
-    box.innerHTML = `<div class="plans-empty">Добавь регулярные платежи (зарплату, аренду, кредит) — появится прогноз до конца месяца.</div>`;
+    box.innerHTML = `<div class="plans-empty">Добавь регулярные платежи (зарплату, аренду, кредит) — появится прогноз.</div>`;
     return;
   }
-  box.innerHTML = [...DB.plans].sort((a,b)=>a.day-b.day).map(p => `
+  box.innerHTML = [...DB.plans].sort((a,b)=>a.day-b.day).map(p => {
+    const e = effDate(p, viewYear, viewMonth);
+    const moved = e.getDate() !== Math.min(p.day, new Date(viewYear, viewMonth+1, 0).getDate()) || e.getMonth()!==viewMonth;
+    const sub = moved
+      ? `в этом месяце — ${e.getDate()} ${MONTHS[e.getMonth()].slice(0,3)} (${WD_RU[e.getDay()]})`
+      : 'каждый месяц';
+    return `
     <div class="plan">
       <div class="plan-day"><b class="num">${p.day}</b><span>числа</span></div>
       <div class="plan-info">
         <div class="plan-name">${esc(p.name)}</div>
-        <div class="plan-sub">каждый месяц</div>
+        <div class="plan-sub">${sub}</div>
       </div>
       <div class="plan-sum num ${p.type}">${p.type==='inc'?'+':'−'}${fmt(p.sum)}</div>
       <button class="tx-del" data-id="${p.id}" aria-label="Удалить план">✕</button>
-    </div>`).join('');
+    </div>`;}).join('');
   box.querySelectorAll('.tx-del').forEach(b => b.onclick = () => {
     if (confirm('Удалить этот плановый платёж?')){
       DB.plans = DB.plans.filter(p=>p.id!==b.dataset.id);
@@ -625,20 +1049,39 @@ function renderPlans(){
   });
 }
 
-// ---- Категории + лимиты ----
+// ---- Категории: пирог + лимиты ----
 function renderChart(scope){
   const byCat = {};
   scope.filter(t=>t.type==='exp').forEach(t => byCat[t.cat]=(byCat[t.cat]||0)+t.sum);
-  // категории с лимитом показываем даже без трат
   Object.keys(DB.budgets).forEach(c => { if (!(c in byCat)) byCat[c]=0; });
   const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   const box = $('chart');
-  if (!cats.length){
+  const total = cats.reduce((s,c)=>s+c[1],0);
+  if (!cats.length || total===0){
     box.innerHTML = `<div class="plans-empty">В этом месяце расходов пока нет.</div>`;
     return;
   }
+
+  // пирог
+  const pieCats = cats.filter(c=>c[1]>0);
+  const top = pieCats.slice(0,6);
+  const rest = pieCats.slice(6).reduce((s,c)=>s+c[1],0);
+  const segs = top.map((c,k)=>({n:c[0], v:c[1], col:PIE_COLORS[k%PIE_COLORS.length]}));
+  if (rest>0) segs.push({n:'Остальное', v:rest, col:PIE_COLORS[6]});
+  let acc = 0, grad = [];
+  segs.forEach(s => {
+    const from = acc/total*360; acc += s.v;
+    grad.push(`${s.col} ${from.toFixed(1)}deg ${(acc/total*360).toFixed(1)}deg`);
+  });
+  const pie = `<div class="pie-wrap">
+    <div class="pie" style="background:conic-gradient(${grad.join(',')})"></div>
+    <div class="pie-legend">${segs.map(s =>
+      `<div><i style="background:${s.col}"></i>${esc(s.n)} — <b class="num">${Math.round(s.v/total*100)}%</b></div>`).join('')}
+    </div>
+  </div>`;
+
   const max = Math.max(...cats.map(c=>c[1]), 1);
-  box.innerHTML = cats.map(([c,s])=>{
+  box.innerHTML = pie + cats.map(([c,s])=>{
     const lim = DB.budgets[c];
     if (lim){
       const pct = Math.round(s/lim*100);
@@ -660,13 +1103,15 @@ function renderChart(scope){
 
 // ---- Год ----
 function renderYear(){
-  const mi = Array(12).fill(0), me = Array(12).fill(0);
+  const mi = Array(12).fill(0), me = Array(12).fill(0), mp = Array(12).fill(0);
   const byCat = {};
   DB.txs.forEach(t => {
     const d = new Date(t.date+'T00:00');
     if (d.getFullYear()!==viewYear) return;
-    if (t.type==='inc') mi[d.getMonth()] += t.sum;
-    if (t.type==='exp'){ me[d.getMonth()] += t.sum; byCat[t.cat]=(byCat[t.cat]||0)+t.sum; }
+    const m = d.getMonth();
+    if (t.type==='inc') mi[m] += t.sum;
+    else if (t.type==='exp'){ me[m] += t.sum; byCat[t.cat]=(byCat[t.cat]||0)+t.sum; }
+    else mp[m] += (t.type==='save'||t.type==='invest') ? t.sum : -t.sum;
   });
   const max = Math.max(...mi, ...me, 1);
   const now = new Date();
@@ -677,30 +1122,45 @@ function renderYear(){
       <i class="ye" style="height:${Math.round(me[k]/max*100)}%"></i>
     </div>`;
   }).join('');
-  // тап по месяцу — перейти в него
   $('ybars').querySelectorAll('.ycol').forEach(c => c.onclick = () => {
     viewMonth = +c.dataset.m; viewMode='month'; render();
     window.scrollTo({top:0});
   });
+
+  // отложено по месяцам
+  const smax = Math.max(...mp.map(Math.abs), 1);
+  $('sbars').innerHTML = mp.map((v,k)=>{
+    const cur = viewYear===now.getFullYear() && k===now.getMonth();
+    return `<div class="ycol ${cur?'cur':''}" data-m="${k}" title="${MONTHS[k]}: ${signFmt(v)}">
+      <i class="ys" style="height:${Math.round(Math.abs(v)/smax*100)}%;background:${v>=0?'var(--sav)':'var(--exp)'}"></i>
+    </div>`;
+  }).join('');
+  $('sbars').querySelectorAll('.ycol').forEach(c => c.onclick = () => {
+    viewMonth = +c.dataset.m; viewMode='month'; render();
+    window.scrollTo({top:0});
+  });
+
   const cats = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   $('yearCats').innerHTML = cats.length
     ? `<div class="yrows">` + cats.map(([c,s])=>
         `<div class="yrow"><b>${esc(c)}</b><span class="num">${fmt(s)}</span></div>`).join('') + `</div>`
     : `<div class="plans-empty">За этот год расходов нет.</div>`;
 
-  // Анализ года
   const yTx = DB.txs.filter(t => new Date(t.date+'T00:00').getFullYear()===viewYear);
   const yInc = yTx.filter(t=>t.type==='inc').reduce((s,t)=>s+t.sum,0);
   const yExp = yTx.filter(t=>t.type==='exp').reduce((s,t)=>s+t.sum,0);
-  const yPut = yTx.reduce((s,t)=> s + (t.type==='save'||t.type==='invest'?t.sum : t.type==='take'||t.type==='divest'?-t.sum : 0), 0);
+  const yPut = putOf(yTx);
   const activeMonths = new Set(yTx.map(t=>new Date(t.date+'T00:00').getMonth())).size || 1;
   const rate = yInc>0 ? Math.round(yPut/yInc*100) : 0;
   const top = cats.length ? cats[0] : null;
+  const bestM = mp.indexOf(Math.max(...mp));
   $('yearAnalysis').innerHTML = yTx.length ? `<div class="yrows">
     <div class="yrow"><b>Средний доход в месяц</b><span class="num">${fmt(Math.round(yInc/activeMonths))}</span></div>
     <div class="yrow"><b>Средний расход в месяц</b><span class="num">${fmt(Math.round(yExp/activeMonths))}</span></div>
-    <div class="yrow"><b>Отложено за год (копилка + инвестиции)</b><span class="num ${yPut>=0?'':'neg'}">${fmt(yPut)}</span></div>
+    <div class="yrow"><b>Итог года (доходы − расходы)</b><span class="num" style="color:${yInc-yExp>=0?'var(--inc)':'var(--exp)'}">${signFmt(yInc-yExp)}</span></div>
+    <div class="yrow"><b>Отложено за год (копилки + инвестиции)</b><span class="num">${fmt(yPut)}</span></div>
     <div class="yrow"><b>Норма сбережений</b><span class="num" style="color:${rate>=20?'var(--inc)':rate>=10?'#D98E2B':'var(--exp)'}">${rate}% от дохода</span></div>
+    ${Math.max(...mp)>0 ? `<div class="yrow"><b>Лучший месяц по откладыванию</b><span style="text-transform:capitalize">${MONTHS[bestM]} · <span class="num">${fmt(mp[bestM])}</span></span></div>` : ''}
     ${top ? `<div class="yrow"><b>Больше всего уходит на</b><span>${esc(top[0])} · <span class="num">${fmt(top[1])}</span></span></div>` : ''}
   </div>` : `<div class="plans-empty">Записей за этот год пока нет.</div>`;
 }
@@ -728,33 +1188,50 @@ function renderHistory(scope){
   hist.innerHTML = (searchQ ? `<div class="day-head" style="padding-bottom:8px"><span>Найдено записей: ${list.length}</span></div>` : '') +
     days.map(day => {
     const dayTx = byDay[day];
-    const daySum = dayTx.reduce((s,t)=>s+flow(t),0);
+    const daySum = dayTx.reduce((s,t)=> s + (t.type==='inc'?t.sum : t.type==='exp'?-t.sum : 0), 0);
     return `<div class="day-group">
       <div class="day-head"><span>${dayLabel(day)}</span><span class="num">${signFmt(daySum)}</span></div>
-      ${dayTx.map(t => `
+      ${dayTx.map(t => {
+        const sub = [txVia(t), t.note].filter(Boolean).join(' · ');
+        return `
         <div class="tx" data-id="${t.id}">
           <div class="tx-ico ${t.type}">${txIcon(t)}</div>
           <div class="tx-info">
             <div class="tx-cat">${esc(txLabel(t))}</div>
-            ${t.note ? `<div class="tx-note">${esc(t.note)}</div>` : ''}
+            ${sub ? `<div class="tx-note">${esc(sub)}</div>` : ''}
           </div>
-          <div class="tx-sum num ${t.type}">${flow(t)>0?'+':'−'}${fmt(t.sum)}</div>
+          <div class="tx-sum num ${t.type}">${t.type==='move'?'':((t.type==='inc'||t.type==='take'||t.type==='divest')?'+':'−')}${fmt(t.sum)}</div>
           <button class="tx-del" data-id="${t.id}" aria-label="Удалить">✕</button>
-        </div>`).join('')}
+        </div>`;}).join('')}
     </div>`;
   }).join('');
   hist.querySelectorAll('.tx-del').forEach(b => b.onclick = e => {
     e.stopPropagation();
-    if (confirm('Удалить эту запись?')){
-      DB.txs = DB.txs.filter(t=>t.id!==b.dataset.id);
-      save(); render();
-    }
+    deleteTx(b.dataset.id);
   });
   hist.querySelectorAll('.tx').forEach(el => el.onclick = () => {
     const t = DB.txs.find(t=>t.id===el.dataset.id);
     if (t) openTxSheet(t);
   });
 }
+
+// ---- Отмена удаления ----
+let lastDeleted = null, snackTimer = null;
+function deleteTx(id){
+  lastDeleted = DB.txs.find(t=>t.id===id) || null;
+  DB.txs = DB.txs.filter(t=>t.id!==id);
+  save(); render();
+  if (lastDeleted){
+    const s = $('snack');
+    s.style.display = 'flex';
+    clearTimeout(snackTimer);
+    snackTimer = setTimeout(()=>{ s.style.display='none'; lastDeleted=null; }, 6000);
+  }
+}
+$('undoBtn').onclick = () => {
+  if (lastDeleted){ DB.txs.push(lastDeleted); lastDeleted=null; save(); render(); }
+  $('snack').style.display='none';
+};
 
 // ============ ПОИСК ============
 $('searchIn').oninput = e => {
@@ -769,41 +1246,150 @@ $('searchClear').onclick = () => {
 
 // ============ ФОРМА ОПЕРАЦИИ ============
 const sheetWrap = $('sheetWrap');
+let formCur = '₽';
+let formAcc2 = null;
+
+function renderCurChips(){
+  const base = DB.settings.cur;
+  if (!CURRENCIES.includes(formCur)) formCur = base;
+  $('curChips').innerHTML = [base, ...CURRENCIES.filter(c=>c!==base)].map(c =>
+    `<button class="chip ${c===formCur?'sel':''}" data-cur="${c}">${c}${c===base?' (основная)':''}</button>`).join('');
+  $('curChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    formCur = ch.dataset.cur; renderCurChips();
+  });
+  const foreign = formCur !== base;
+  $('rateField').style.display = foreign ? 'block' : 'none';
+  if (foreign){
+    $('rateLabel').textContent = 'Курс: 1 ' + formCur + ' = ? ' + base;
+    if (!$('rate').value) $('rate').value = DB.settings.rates[formCur] || '';
+  }
+}
+
 function renderChips(){
   const box = $('chips');
-  $('chipsLabel').textContent = formType==='sav' ? 'Что сделать' : 'Категория';
   $('savHint').style.display = formType==='sav' ? 'block' : 'none';
-  box.innerHTML = CATS[formType].map(c =>
-    `<button class="chip ${c.n===formCat?'sel':''}" data-c="${c.n}">${c.i} ${c.n}</button>`).join('');
-  box.querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+  $('accField').style.display = 'block';
+  if (formType==='sav'){
+    $('chipsLabel').textContent = 'Что сделать';
+    box.innerHTML = SAV_ACTIONS.map(c =>
+      `<button class="chip ${c.n===formCat?'sel':''}" data-c="${c.n}">${c.i} ${c.n}</button>`).join('');
+    box.querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+      formCat = ch.dataset.c;
+      formAcc = null;
+      renderChips();
+    });
+    renderAccChips();
+    return;
+  }
+  $('chipsLabel').textContent = 'Категория';
+  $('accLabel').textContent = formType==='exp' ? 'Откуда деньги' : 'Куда положить';
+  box.innerHTML = getCats(formType).map((c,idx) => {
+    const custom = idx >= BASE_CATS[formType].length;
+    return `<button class="chip ${c.n===formCat?'sel':''}" data-c="${esc(c.n)}">${c.i} ${esc(c.n)}${custom?`<span class="chip-x" data-x="${esc(c.n)}">✕</span>`:''}</button>`;
+  }).join('') + `<button class="chip add" id="addCatChip">＋ своя</button>`;
+  box.querySelectorAll('.chip[data-c]').forEach(ch => ch.onclick = e => {
+    const x = e.target.closest('.chip-x');
+    if (x){
+      if (confirm('Убрать категорию «'+x.dataset.x+'»? Старые записи с ней останутся.')){
+        DB.customCats[formType] = DB.customCats[formType].filter(c=>c.n!==x.dataset.x);
+        delete DB.budgets[x.dataset.x];
+        if (formCat===x.dataset.x) formCat = BASE_CATS[formType][0].n;
+        save(); renderChips();
+      }
+      return;
+    }
     formCat = ch.dataset.c; renderChips();
+  });
+  $('addCatChip').onclick = () => {
+    const name = (prompt('Название новой категории:')||'').trim();
+    if (!name) return;
+    if (getCats(formType).some(c=>c.n.toLowerCase()===name.toLowerCase())){
+      alert('Такая категория уже есть'); return;
+    }
+    DB.customCats[formType].push({n:name, i:'🏷'});
+    formCat = name;
+    save(); renderChips();
+  };
+  renderMoneyChips();
+}
+// счёт-цель для операций копилки
+function renderAccChips(){
+  const isMove = formCat==='Перевод';
+  $('accLabel').textContent = isMove ? 'Откуда' : 'Какой счёт';
+  const kind = SAV_ACTIONS.find(c=>c.n===formCat).kind;
+  const accs = DB.accounts.filter(a=>a.kind===kind);
+  if (!accs.some(a=>a.id===formAcc)) formAcc = accs.length ? accs[0].id : null;
+  $('accChips').innerHTML = accs.map(a =>
+    `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">${a.kind==='sav'?'🏦':'📈'} ${esc(a.name)} · <span class="num">${fmt(accBalance(a))}</span></button>`).join('');
+  $('accChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    formAcc = ch.dataset.a;
+    if (formAcc2===formAcc) formAcc2 = null;
+    renderAccChips();
+  });
+  $('moveField').style.display = isMove ? 'block' : 'none';
+  if (isMove){
+    const others = accs.filter(a=>a.id!==formAcc);
+    if (!others.some(a=>a.id===formAcc2)) formAcc2 = others.length ? others[0].id : null;
+    $('moveChips').innerHTML = others.length ? others.map(a =>
+      `<button class="chip ${a.id===formAcc2?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)} · <span class="num">${fmt(accBalance(a))}</span></button>`).join('')
+      : `<div class="plans-empty" style="padding:4px 0">Нужна вторая копилка — создай её в «Счета и копилки».</div>`;
+    $('moveChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+      formAcc2 = ch.dataset.a; renderAccChips();
+    });
+  }
+}
+// источник/назначение для расходов и доходов: «на руках» или копилка
+function renderMoneyChips(){
+  $('moveField').style.display = 'none';
+  const accs = DB.accounts.filter(a=>a.kind==='sav');
+  if (formAcc && !accs.some(a=>a.id===formAcc)) formAcc = '';
+  $('accChips').innerHTML =
+    `<button class="chip ${!formAcc?'sel':''}" data-a="">👛 На руках</button>` +
+    accs.map(a =>
+      `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)} · <span class="num">${fmt(accBalance(a))}</span></button>`).join('');
+  $('accChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    formAcc = ch.dataset.a; renderMoneyChips();
   });
 }
 function setType(t){
   formType = t;
-  if (!CATS[t].some(c=>c.n===formCat)) formCat = CATS[t][0].n;
   $('segExp').className = t==='exp' ? 'on-exp' : '';
   $('segInc').className = t==='inc' ? 'on-inc' : '';
   $('segSav').className = t==='sav' ? 'on-sav' : '';
   renderChips();
 }
-$('segExp').onclick = () => { formCat=CATS.exp[0].n; setType('exp'); };
-$('segInc').onclick = () => { formCat=CATS.inc[0].n; setType('inc'); };
-$('segSav').onclick = () => { formCat=CATS.sav[0].n; setType('sav'); };
+$('segExp').onclick = () => { formCat=BASE_CATS.exp[0].n; formAcc=''; setType('exp'); };
+$('segInc').onclick = () => { formCat=BASE_CATS.inc[0].n; formAcc=''; setType('inc'); };
+$('segSav').onclick = () => { formCat=SAV_ACTIONS[0].n; formAcc=null; setType('sav'); };
 
 function openTxSheet(t){
   editingId = t ? t.id : null;
   $('txTitle').textContent = t ? 'Изменить запись' : 'Новая операция';
   $('txDeleteBtn').style.display = t ? 'block' : 'none';
-  $('amount').value = t ? String(t.sum).replace('.',',') : '';
   $('note').value = t ? (t.note||'') : '';
   $('date').value = t ? t.date : new Date().toISOString().slice(0,10);
-  if (t){
-    if (t.type==='save' || t.type==='take' || t.type==='invest' || t.type==='divest'){
-      formCat = {save:'Отложить', take:'Взять из накоплений', invest:'Вложить в инвестиции', divest:'Вывести из инвестиций'}[t.type];
-      setType('sav');
-    } else { formCat = t.cat; setType(t.type); }
-  } else { formCat = CATS.exp[0].n; setType('exp'); }
+  if (t && t.fx){
+    formCur = t.fx.cur;
+    $('amount').value = String(t.fx.sum).replace('.',',');
+    $('rate').value = String(t.fx.rate).replace('.',',');
+  } else {
+    formCur = DB.settings.cur;
+    $('amount').value = t ? String(t.sum).replace('.',',') : '';
+    $('rate').value = '';
+  }
+  renderCurChips();
+  if (t && KIND_OF[t.type]){
+    formCat = {save:'Отложить', take:'Взять', invest:'Вложить', divest:'Вывести', move:'Перевод'}[t.type];
+    formAcc = t.acc || null;
+    formAcc2 = t.to || null;
+    setType('sav');
+  } else if (t){
+    formCat = t.cat;
+    formAcc = (t.type==='exp' ? t.src : t.dst) || '';
+    setType(t.type);
+  } else {
+    formCat = BASE_CATS.exp[0].n; formAcc=''; setType('exp');
+  }
   sheetWrap.classList.add('open');
 }
 $('addBtn').onclick = () => openTxSheet(null);
@@ -818,24 +1404,46 @@ $('txDeleteBtn').onclick = () => {
 };
 
 $('saveBtn').onclick = () => {
-  const sum = parseSum($('amount').value);
+  let sum = parseSum($('amount').value);
   if (!sum || sum<=0){ alert('Введи сумму'); return; }
   const date = $('date').value || new Date().toISOString().slice(0,10);
-  let type = formType, cat = formCat;
-  if (formType==='sav'){
-    const c = CATS.sav.find(c=>c.n===formCat);
-    type = c.t; cat = c.n;
-    const others = DB.txs.filter(t=>t.id!==editingId);
-    if (type==='take'){
-      const sv = others.reduce((s,t)=> s + (t.type==='save'?t.sum : t.type==='take'?-t.sum : 0), 0);
-      if (sum > sv && !confirm('В накоплениях сейчас '+fmt(sv)+'. Всё равно записать?')) return;
-    }
-    if (type==='divest'){
-      const iv = others.reduce((s,t)=> s + (t.type==='invest'?t.sum : t.type==='divest'?-t.sum : 0), 0);
-      if (sum > iv && !confirm('В инвестициях сейчас '+fmt(iv)+'. Всё равно записать?')) return;
-    }
+  let type = formType, cat = formCat, fx = null;
+  if (formCur !== DB.settings.cur){
+    const rate = parseSum($('rate').value);
+    if (!rate || rate<=0){ alert('Введи курс: сколько стоит 1 '+formCur+' в '+DB.settings.cur); return; }
+    fx = { cur: formCur, sum, rate };
+    sum = Math.round(sum * rate * 100) / 100;
+    DB.settings.rates[formCur] = rate;
   }
   const rec = { id: editingId || uid(), type, sum, cat, note: $('note').value.trim(), date };
+  if (fx) rec.fx = fx;
+
+  if (formType==='sav'){
+    const c = SAV_ACTIONS.find(c=>c.n===formCat);
+    rec.type = c.t; rec.cat = c.n;
+    if (!formAcc){ alert('Выбери счёт'); return; }
+    rec.acc = formAcc;
+    if (rec.type==='move'){
+      if (!formAcc2){ alert('Выбери, куда перевести'); return; }
+      if (formAcc2===formAcc){ alert('Счета должны быть разными'); return; }
+      rec.to = formAcc2;
+      const a = accById(formAcc);
+      const bal = balanceWithout(formAcc, editingId);
+      if (rec.sum > bal && !confirm('На счёте «'+a.name+'» сейчас '+fmt(bal)+'. Всё равно перевести?')) return;
+    } else if (rec.type==='take' || rec.type==='divest'){
+      const a = accById(formAcc);
+      const bal = balanceWithout(formAcc, editingId);
+      if (sum > bal && !confirm('На счёте «'+a.name+'» сейчас '+fmt(bal)+'. Всё равно записать?')) return;
+    }
+  } else if (formType==='exp' && formAcc){
+    rec.src = formAcc;
+    const a = accById(formAcc);
+    const bal = balanceWithout(formAcc, editingId);
+    if (sum > bal && !confirm('В копилке «'+a.name+'» сейчас '+fmt(bal)+'. Всё равно записать?')) return;
+  } else if (formType==='inc' && formAcc){
+    rec.dst = formAcc;
+  }
+
   if (editingId){
     const i = DB.txs.findIndex(t=>t.id===editingId);
     if (i>=0) DB.txs[i] = rec; else DB.txs.push(rec);
@@ -846,9 +1454,166 @@ $('saveBtn').onclick = () => {
   sheetWrap.classList.remove('open');
   render();
 };
+// баланс счёта без учёта редактируемой записи
+function balanceWithout(accId, exceptId){
+  return DB.txs.reduce((s,t)=>{
+    if (t.id===exceptId) return s;
+    if (t.type==='move'){
+      if (t.acc===accId) return s - t.sum;
+      if (t.to===accId)  return s + t.sum;
+      return s;
+    }
+    if (t.acc===accId) return s + ((t.type==='save'||t.type==='invest') ? t.sum : -t.sum);
+    if (t.type==='inc' && t.dst===accId) return s + t.sum;
+    if (t.type==='exp' && t.src===accId) return s - t.sum;
+    return s;
+  }, 0);
+}
+
+// ============ ШАБЛОНЫ ============
+const tplWrap = $('tplWrap');
+let tplCat = BASE_CATS.exp[0].n, tplSrc = '';
+function renderTplSheet(){
+  $('tplList').innerHTML = DB.templates.length
+    ? DB.templates.map(t => `<div class="budget-row">
+        <span class="bn">${esc(t.name)} · <span class="num">${fmt(t.sum)}</span></span>
+        <button class="tx-del" data-id="${t.id}" aria-label="Удалить шаблон">✕</button>
+      </div>`).join('')
+    : `<div class="plans-empty" style="padding:4px 0 10px">Шаблонов пока нет.</div>`;
+  $('tplList').querySelectorAll('.tx-del').forEach(b => b.onclick = () => {
+    DB.templates = DB.templates.filter(t=>t.id!==b.dataset.id);
+    save(); renderTplSheet(); renderTemplates();
+  });
+  $('tplCatChips').innerHTML = getCats('exp').map(c =>
+    `<button class="chip ${c.n===tplCat?'sel':''}" data-c="${esc(c.n)}">${c.i} ${esc(c.n)}</button>`).join('');
+  $('tplCatChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    tplCat = ch.dataset.c; renderTplSheet();
+  });
+  const accs = DB.accounts.filter(a=>a.kind==='sav');
+  $('tplSrcChips').innerHTML =
+    `<button class="chip ${!tplSrc?'sel':''}" data-a="">👛 На руках</button>` +
+    accs.map(a => `<button class="chip ${a.id===tplSrc?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)}</button>`).join('');
+  $('tplSrcChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    tplSrc = ch.dataset.a; renderTplSheet();
+  });
+}
+$('tplBtn').onclick = () => {
+  $('tplName').value=''; $('tplSum').value='';
+  tplCat = BASE_CATS.exp[0].n; tplSrc = '';
+  renderTplSheet();
+  tplWrap.classList.add('open');
+};
+$('tplCancelBtn').onclick = () => tplWrap.classList.remove('open');
+tplWrap.onclick = e => { if (e.target===tplWrap) tplWrap.classList.remove('open'); };
+$('tplSaveBtn').onclick = () => {
+  const sum = parseSum($('tplSum').value);
+  const name = $('tplName').value.trim() || tplCat;
+  if (!sum || sum<=0){ alert('Введи сумму'); return; }
+  DB.templates.push({ id: uid(), name, sum, cat: tplCat, src: tplSrc||undefined });
+  save();
+  $('tplName').value=''; $('tplSum').value='';
+  renderTplSheet(); renderTemplates();
+};
+
+// ============ БАЗОВАЯ ВАЛЮТА ============
+const baseCurWrap = $('baseCurWrap');
+let pickCur = '₽';
+function renderBaseCurChips(){
+  $('baseCurChips').innerHTML = CURRENCIES.map(c =>
+    `<button class="chip ${c===pickCur?'sel':''}" data-cur="${c}">${c}</button>`).join('');
+  $('baseCurChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    pickCur = ch.dataset.cur; renderBaseCurChips();
+  });
+}
+$('baseCurBtn').onclick = () => {
+  pickCur = DB.settings.cur;
+  renderBaseCurChips();
+  baseCurWrap.classList.add('open');
+};
+$('baseCurCancelBtn').onclick = () => baseCurWrap.classList.remove('open');
+baseCurWrap.onclick = e => { if (e.target===baseCurWrap) baseCurWrap.classList.remove('open'); };
+$('baseCurSaveBtn').onclick = () => {
+  DB.settings.cur = pickCur;
+  save(); baseCurWrap.classList.remove('open'); render();
+};
+
+// ============ СЧЕТА ============
+const accWrap = $('accWrap');
+function setAccKind(k){
+  accKind = k;
+  $('akSav').className = k==='sav' ? 'on-sav' : '';
+  $('akInv').className = k==='inv' ? 'on-sav' : '';
+  $('accExtraLabel').textContent = k==='sav' ? 'Цель, ₽ (необязательно)' : 'Сколько стоит сейчас, ₽ (необязательно)';
+  $('accHint').textContent = k==='sav'
+    ? 'Например: «Отпуск», «Накопительный счёт», «Подушка».'
+    : 'Например: «Брокер», «Вклад», «Крипта». Текущую стоимость обновляй время от времени — приложение посчитает прибыль.';
+}
+$('akSav').onclick = () => { if (!editingAccId) setAccKind('sav'); };
+$('akInv').onclick = () => { if (!editingAccId) setAccKind('inv'); };
+
+function openAccSheet(a){
+  editingAccId = a ? a.id : null;
+  $('accTitle').textContent = a ? 'Счёт «'+a.name+'»' : 'Новый счёт';
+  $('accKindSeg').style.display = a ? 'none' : 'flex';
+  $('accName').value = a ? a.name : '';
+  setAccKind(a ? a.kind : 'sav');
+  $('accExtra').value = a ? (a.kind==='sav' ? (a.goal||'') : (a.value||'')) : '';
+  $('accDeleteBtn').style.display = a ? 'block' : 'none';
+  accWrap.classList.add('open');
+}
+$('addAccBtn').onclick = () => openAccSheet(null);
+$('accCancelBtn').onclick = () => accWrap.classList.remove('open');
+accWrap.onclick = e => { if (e.target===accWrap) accWrap.classList.remove('open'); };
+
+$('accSaveBtn').onclick = () => {
+  const name = $('accName').value.trim();
+  if (!name){ alert('Введи название счёта'); return; }
+  const extra = parseSum($('accExtra').value) || 0;
+  if (editingAccId){
+    const a = accById(editingAccId);
+    a.name = name;
+    if (a.kind==='sav') a.goal = extra>0 ? extra : 0;
+    else a.value = extra>0 ? extra : 0;
+  } else {
+    const a = {id:uid(), name, kind:accKind, goal:0, value:0};
+    if (accKind==='sav') a.goal = extra>0 ? extra : 0;
+    else a.value = extra>0 ? extra : 0;
+    DB.accounts.push(a);
+  }
+  save(); accWrap.classList.remove('open'); render();
+};
+$('accDeleteBtn').onclick = () => {
+  const a = accById(editingAccId);
+  if (!a) return;
+  if (DB.txs.some(t=>t.acc===a.id || t.src===a.id || t.dst===a.id || t.to===a.id)){
+    alert('На этом счёте есть записи. Сначала удали их или перенеси (отредактируй каждую и выбери другой счёт).');
+    return;
+  }
+  if (DB.accounts.filter(x=>x.kind===a.kind).length<=1){
+    alert('Нельзя удалить последний счёт этого вида.');
+    return;
+  }
+  if (confirm('Удалить счёт «'+a.name+'»?')){
+    DB.accounts = DB.accounts.filter(x=>x.id!==a.id);
+    save(); accWrap.classList.remove('open'); render();
+  }
+};
 
 // ============ ФОРМА ПЛАНА ============
 const planWrap = $('planWrap');
+const SHIFTS = [
+  {v:'none',   l:'Не переносить'},
+  {v:'before', l:'На пятницу до'},
+  {v:'after',  l:'На понедельник после'}
+];
+let planShift = 'none';
+function renderShiftChips(){
+  $('shiftChips').innerHTML = SHIFTS.map(s =>
+    `<button class="chip ${s.v===planShift?'sel':''}" data-v="${s.v}">${s.l}</button>`).join('');
+  $('shiftChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    planShift = ch.dataset.v; renderShiftChips();
+  });
+}
 function setPlanType(t){
   planType = t;
   $('psegExp').className = t==='exp' ? 'on-exp' : '';
@@ -858,6 +1623,8 @@ $('psegExp').onclick = () => setPlanType('exp');
 $('psegInc').onclick = () => setPlanType('inc');
 $('addPlanBtn').onclick = () => {
   $('pname').value=''; $('psum').value=''; $('pday').value='';
+  planShift = 'none';
+  renderShiftChips();
   setPlanType('exp');
   planWrap.classList.add('open');
 };
@@ -870,17 +1637,17 @@ $('planSaveBtn').onclick = () => {
   if (!name){ alert('Введи название'); return; }
   if (!sum || sum<=0){ alert('Введи сумму'); return; }
   if (!day || day<1 || day>31){ alert('Введи число месяца от 1 до 31'); return; }
-  DB.plans.push({ id: uid(), type: planType, name, sum, day });
+  DB.plans.push({ id: uid(), type: planType, name, sum, day, shift: planShift });
   save(); planWrap.classList.remove('open'); render();
 };
 
 // ============ ЛИМИТЫ ============
 const budgetWrap = $('budgetWrap');
 $('budgetBtn').onclick = () => {
-  $('budgetRows').innerHTML = CATS.exp.map(c => `
+  $('budgetRows').innerHTML = getCats('exp').map(c => `
     <div class="budget-row">
-      <span class="bn">${c.i} ${c.n}</span>
-      <input type="text" inputmode="numeric" class="num" data-c="${c.n}"
+      <span class="bn">${c.i} ${esc(c.n)}</span>
+      <input type="text" inputmode="numeric" class="num" data-c="${esc(c.n)}"
         value="${DB.budgets[c.n] ? DB.budgets[c.n] : ''}" placeholder="без лимита">
     </div>`).join('');
   budgetWrap.classList.add('open');
@@ -897,38 +1664,10 @@ $('budgetSaveBtn').onclick = () => {
   save(); budgetWrap.classList.remove('open'); render();
 };
 
-// ============ ЦЕЛЬ ============
-const goalWrap = $('goalWrap');
-$('savingsBlock').onclick = () => {
-  $('goalSum').value = DB.goal ? String(DB.goal) : '';
-  goalWrap.classList.add('open');
-};
-$('goalCancelBtn').onclick = () => goalWrap.classList.remove('open');
-goalWrap.onclick = e => { if (e.target===goalWrap) goalWrap.classList.remove('open'); };
-$('goalSaveBtn').onclick = () => {
-  const v = parseSum($('goalSum').value);
-  DB.goal = (v && v>0) ? v : 0;
-  save(); goalWrap.classList.remove('open'); render();
-};
-
-// ============ ИНВЕСТИЦИИ ============
-const investWrap = $('investWrap');
-$('investBlock').onclick = () => {
-  $('investInfo').textContent = 'Вложено всего (по записям): ' + fmt(investTotal()) + '.';
-  $('investSum').value = DB.investValue ? String(DB.investValue) : '';
-  investWrap.classList.add('open');
-};
-$('investCancelBtn').onclick = () => investWrap.classList.remove('open');
-investWrap.onclick = e => { if (e.target===investWrap) investWrap.classList.remove('open'); };
-$('investSaveBtn').onclick = () => {
-  const v = parseSum($('investSum').value);
-  DB.investValue = (v && v>0) ? v : 0;
-  save(); investWrap.classList.remove('open'); render();
-};
-
 // ============ ВКЛАДКИ И МЕСЯЦЫ ============
 $('tabMonth').onclick = () => { viewMode='month'; render(); };
 $('tabYear').onclick  = () => { viewMode='year';  render(); };
+$('tabCap').onclick   = () => { viewMode='cap';   render(); };
 $('prevM').onclick = () => {
   if (viewMode==='year'){ viewYear--; }
   else { viewMonth--; if (viewMonth<0){ viewMonth=11; viewYear--; } }
@@ -940,7 +1679,7 @@ $('nextM').onclick = () => {
   render();
 };
 
-// ============ ДАННЫЕ: БЭКАП И CSV ============
+// ============ ДАННЫЕ ============
 function download(name, content, mime){
   const blob = new Blob([content], {type:mime});
   const a = document.createElement('a');
@@ -954,11 +1693,19 @@ $('exportBtn').onclick = () =>
     JSON.stringify(DB,null,2), 'application/json');
 
 $('csvBtn').onclick = () => {
-  const TYPE_RU = {inc:'Доход', exp:'Расход', save:'В накопления', take:'Из накоплений', invest:'В инвестиции', divest:'Из инвестиций'};
-  const rows = [['Дата','Тип','Категория','Сумма','Заметка']];
-  [...DB.txs].sort((a,b)=>a.date<b.date?-1:1).forEach(t =>
-    rows.push([t.date, TYPE_RU[t.type]||t.type, txLabel(t),
-      String(t.sum).replace('.',','), (t.note||'').replace(/[;\n]/g,' ')]));
+  const TYPE_RU = {inc:'Доход', exp:'Расход', save:'В накопления', take:'Из накоплений', invest:'В инвестиции', divest:'Из инвестиций', move:'Перевод'};
+  const rows = [['Дата','Тип','Категория','Счёт','Сумма','Валюта операции','Заметка']];
+  [...DB.txs].sort((a,b)=>a.date<b.date?-1:1).forEach(t => {
+    const aid = t.acc || t.src || t.dst;
+    const a = aid ? accById(aid) : null;
+    let accName = a ? a.name : 'На руках';
+    if (t.type==='move'){ const b=accById(t.to); accName = (a?a.name:'?')+' → '+(b?b.name:'?'); }
+    rows.push([t.date, TYPE_RU[t.type]||t.type, KIND_OF[t.type]?'—':t.cat,
+      accName,
+      String(t.sum).replace('.',','),
+      t.fx ? (String(t.fx.sum).replace('.',',')+' '+t.fx.cur+' по '+String(t.fx.rate).replace('.',',')) : '—',
+      (t.note||'').replace(/[;\n]/g,' ')]);
+  });
   const csv = '\uFEFF' + rows.map(r=>r.join(';')).join('\r\n');
   download('kassa-'+new Date().toISOString().slice(0,10)+'.csv', csv, 'text/csv;charset=utf-8');
 };
@@ -970,11 +1717,21 @@ $('importFile').onchange = e => {
   r.onload = () => {
     try {
       const data = JSON.parse(r.result);
-      let next;
-      if (Array.isArray(data)) next = {txs:data, plans:[], budgets:{}, goal:0, investValue:0};
-      else if (data && Array.isArray(data.txs))
-        next = {txs:data.txs, plans:data.plans||[], budgets:data.budgets||{}, goal:data.goal||0, investValue:data.investValue||0};
-      else throw 0;
+      let next = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
+                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}}};
+      if (Array.isArray(data)) next.txs = data;
+      else if (data && Array.isArray(data.txs)){
+        next.txs = data.txs;
+        next.plans = data.plans||[];
+        next.budgets = data.budgets||{};
+        next.customCats = data.customCats||{exp:[],inc:[]};
+        next.accounts = data.accounts||[];
+        next.templates = data.templates||[];
+        next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}}, data.settings||{});
+        next._oldGoal = data.goal||0;
+        next._oldInvestValue = data.investValue||0;
+      } else throw 0;
+      migrate(next);
       if (confirm('Заменить текущие данные данными из файла? Записей в файле: '+next.txs.length)){
         DB = next; save(); render();
       }
@@ -984,7 +1741,13 @@ $('importFile').onchange = e => {
   e.target.value = '';
 };
 
+// ============ ОФЛАЙН ============
+if ('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
 // ============ СТАРТ ============
+save(); // сохраняем результат миграции
 const now0 = new Date();
 viewYear = now0.getFullYear(); viewMonth = now0.getMonth();
 render();
