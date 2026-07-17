@@ -9,7 +9,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Касса">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2316241F'/%3E%3Ctext x='50' y='66' font-size='48' text-anchor='middle' fill='%23E8F3EC' font-family='Arial'%3E₽%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <style>
   :root{
     --bg:#EFF2EE; --card:#FFFFFF; --ink:#16241F; --ink2:#5C6B63;
@@ -269,7 +271,7 @@
     <button id="tabYear">Год</button>
     <button id="tabCap">Капитал</button>
   </div>
-  <div class="balance-label">👛 На руках (переходит из месяца в месяц)</div>
+  <div class="balance-label" id="handEditBtn" role="button" style="cursor:pointer">👛 На руках (переходит из месяца в месяц) · изменить</div>
   <div class="balance num" id="wallet">0 ₽</div>
   <div class="wallet-line" id="balanceLabel">Итог за месяц: <b class="num" id="balance">0 ₽</b></div>
   <div class="savings-line">🏦 Накопления: <b class="num" id="savingsTotal">0 ₽</b></div>
@@ -426,6 +428,14 @@
       <label for="accName">Название</label>
       <input type="text" id="accName" placeholder="Отпуск, вклад, брокер…">
     </div>
+    <div class="field" id="accCurField">
+      <label>Валюта счёта</label>
+      <div class="chips" id="accCurChips"></div>
+    </div>
+    <div class="field">
+      <label id="accStartLabel" for="accStart">Сколько уже на счёте (остаток)</label>
+      <input class="amount-in num" id="accStart" type="text" inputmode="decimal" placeholder="0">
+    </div>
     <div class="field">
       <label id="accExtraLabel" for="accExtra">Цель, ₽ (необязательно)</label>
       <input class="amount-in num" id="accExtra" type="text" inputmode="decimal" placeholder="0">
@@ -434,6 +444,20 @@
     <button class="save-btn" id="accSaveBtn">Сохранить счёт</button>
     <button class="danger-btn" id="accDeleteBtn">Удалить счёт</button>
     <button class="cancel-btn" id="accCancelBtn">Отмена</button>
+  </div>
+</div>
+
+<!-- Модалка остатка на руках -->
+<div class="sheet-wrap" id="handWrap">
+  <div class="sheet">
+    <h3>Деньги на руках</h3>
+    <p class="hint" style="text-align:left;margin:0 0 14px">Введи, сколько у тебя сейчас в кошельке и на текущих картах. Это стартовая точка — дальше сумма меняется сама от доходов и расходов.</p>
+    <div class="field">
+      <label for="handStart">Сейчас на руках, ₽</label>
+      <input class="amount-in num" id="handStart" type="text" inputmode="decimal" placeholder="0">
+    </div>
+    <button class="save-btn" id="handSaveBtn">Сохранить</button>
+    <button class="cancel-btn" id="handCancelBtn">Отмена</button>
   </div>
 </div>
 
@@ -553,7 +577,7 @@ const CURRENCIES = ['₽','$','€'];
 
 function load(){
   let db = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}}};
+            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}};
   try {
     const raw = JSON.parse(localStorage.getItem(KEY));
     if (Array.isArray(raw)) db.txs = raw;
@@ -564,7 +588,7 @@ function load(){
       db.customCats = raw.customCats||{exp:[],inc:[]};
       db.accounts = raw.accounts||[];
       db.templates = raw.templates||[];
-      db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}}, raw.settings||{});
+      db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}, raw.settings||{});
       db.settings.mix = Object.assign({hand:true,sav:true,inv:true}, db.settings.mix||{});
       db.settings.rates = Object.assign({'$':90,'€':100}, db.settings.rates||{});
       db._oldGoal = raw.goal||0;
@@ -582,6 +606,11 @@ function migrate(db){
   db.txs.forEach(t => {
     if (KIND_OF[t.type] && !t.acc) t.acc = (KIND_OF[t.type]==='sav' ? sav : inv).id;
   });
+  const baseCur = (db.settings && db.settings.cur) || '₽';
+  db.accounts.forEach(a => {
+    if (!a.cur) a.cur = baseCur;
+    if (typeof a.start !== 'number') a.start = 0;
+  });
   delete db._oldGoal; delete db._oldInvestValue;
 }
 function save(){
@@ -590,7 +619,8 @@ function save(){
 }
 
 // ============ ФОРМАТ И СЧЁТЧИКИ ============
-const fmt = n => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n) + ' ' + DB.settings.cur;
+const fmtC = (n,cur) => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n) + ' ' + cur;
+const fmt = n => fmtC(n, DB.settings.cur);
 const signFmt = n => (n>0?'+':'') + fmt(n);
 const MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const parseSum = v => parseFloat(String(v).replace(',','.').replace(/\s/g,''));
@@ -618,7 +648,14 @@ const accBalance = acc => DB.txs.reduce((s,t)=>{
   if (t.type==='exp' && t.src===acc.id) return s - t.sum;
   return s;
 }, 0);
-const kindTotal = kind => DB.accounts.filter(a=>a.kind===kind).reduce((s,a)=>s+accBalance(a),0);
+function rateOf(cur){
+  if (cur === DB.settings.cur) return 1;
+  if (cur === '₽'){ const r = DB.settings.rates[DB.settings.cur]; return r ? 1/r : 1; }
+  return DB.settings.rates[cur] || 1;
+}
+const accBalanceCur = acc => (acc.start||0) + accBalance(acc);
+const accBalanceBase = acc => Math.round(accBalanceCur(acc) * rateOf(acc.cur||DB.settings.cur) * 100) / 100;
+const kindTotal = kind => DB.accounts.filter(a=>a.kind===kind).reduce((s,a)=>s+accBalanceBase(a),0);
 // отложено за набор операций (в копилки/инвестиции минус взятое)
 const putOf = list => list.reduce((s,t)=> s + (t.type==='move'?0 : t.type==='save'||t.type==='invest'?t.sum : t.type==='take'||t.type==='divest'?-t.sum : 0), 0);
 
@@ -694,7 +731,8 @@ function render(){
   $('prevM').style.visibility = isCap ? 'hidden' : 'visible';
   $('nextM').style.visibility = isCap ? 'hidden' : 'visible';
 
-  $('wallet').textContent = fmt(DB.txs.reduce((s,t)=>s+flow(t),0));
+  const handNow = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0);
+  $('wallet').textContent = fmt(handNow);
   $('savingsTotal').textContent = fmt(kindTotal('sav'));
 
   const invAccs = DB.accounts.filter(a=>a.kind==='inv');
@@ -756,12 +794,12 @@ function renderCapital(){
     save(); render();
   });
 
-  const hand = DB.txs.reduce((s,t)=>s+flow(t),0);
-  const invVal = a => a.value>0 ? a.value : accBalance(a);
+  const hand = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0);
+  const invValBase = a => Math.round((a.value>0 ? a.value : accBalanceCur(a)) * rateOf(a.cur||DB.settings.cur) * 100) / 100;
   let total = 0;
   if (mix.hand) total += hand;
-  if (mix.sav) DB.accounts.filter(a=>a.kind==='sav').forEach(a => total += accBalance(a));
-  if (mix.inv) DB.accounts.filter(a=>a.kind==='inv').forEach(a => total += invVal(a));
+  if (mix.sav) DB.accounts.filter(a=>a.kind==='sav').forEach(a => total += accBalanceBase(a));
+  if (mix.inv) DB.accounts.filter(a=>a.kind==='inv').forEach(a => total += invValBase(a));
   $('mixTotal').textContent = fmt(total);
 
   const dim = on => on ? '' : 'opacity:.35';
@@ -771,17 +809,20 @@ function renderCapital(){
   </div>`;
   DB.accounts.forEach(a => {
     const on = a.kind==='sav' ? mix.sav : mix.inv;
-    const bal = accBalance(a);
-    let sum = fmt(bal), sub = a.kind==='sav' ? 'копилка' : 'инвестиции';
+    const cur = a.cur || DB.settings.cur;
+    const foreign = cur !== DB.settings.cur;
+    const bal = accBalanceCur(a);
+    let sum = fmtC(bal,cur), sub = a.kind==='sav' ? 'копилка' : 'инвестиции';
     if (a.kind==='inv' && a.value>0){
       const pl = a.value - bal;
-      sum = fmt(a.value);
-      sub = `вложено ${fmt(bal)} · <span class="${pl>=0?'pl-pos':'pl-neg'} num">${signFmt(pl)}</span>`;
+      sum = fmtC(a.value,cur);
+      sub = `вложено ${fmtC(bal,cur)} · <span class="${pl>=0?'pl-pos':'pl-neg'} num">${(pl>0?'+':'')+fmtC(pl,cur)}</span>`;
     } else if (a.kind==='sav' && a.goal>0){
-      sub = `цель ${fmt(a.goal)} · ${Math.min(100,Math.max(0,Math.round(bal/a.goal*100)))}%`;
+      sub = `цель ${fmtC(a.goal,cur)} · ${Math.min(100,Math.max(0,Math.round(bal/a.goal*100)))}%`;
     }
+    if (foreign) sub += ` · ≈ ${fmt(accBalanceBase(a))}`;
     html += `<div class="acc" data-id="${a.id}" style="${dim(on)}">
-      <div class="acc-top"><span>${a.kind==='sav'?'🏦':'📈'}</span><span class="acc-name">${esc(a.name)}</span><span class="acc-sum num">${sum}</span></div>
+      <div class="acc-top"><span>${a.kind==='sav'?'🏦':'📈'}</span><span class="acc-name">${esc(a.name)}${foreign?' · '+cur:''}</span><span class="acc-sum num">${sum}</span></div>
       <div class="acc-sub">${sub}</div>
     </div>`;
   });
@@ -858,27 +899,35 @@ function renderTemplates(){
 function renderAccounts(){
   const box = $('accList');
   box.innerHTML = DB.accounts.map(a => {
-    const bal = accBalance(a);
-    let sub = '', track = '', sum = fmt(bal);
+    const cur = a.cur || DB.settings.cur;
+    const bal = accBalanceCur(a);
+    const foreign = cur !== DB.settings.cur;
+    let sub = '', track = '', sum = fmtC(bal, cur);
+    const rubLine = foreign ? `≈ ${fmt(accBalanceBase(a))}` : '';
     if (a.kind==='sav'){
+      const bits = [];
       if (a.goal>0){
         const pct = Math.min(100, Math.max(0, Math.round(bal/a.goal*100)));
-        sub = `<div class="acc-sub">цель ${fmt(a.goal)} · ${pct}%</div>`;
+        bits.push(`цель ${fmtC(a.goal,cur)} · ${pct}%`);
         track = `<div class="acc-track"><div style="width:${pct}%"></div></div>`;
       }
+      if (rubLine) bits.push(rubLine);
+      if (bits.length) sub = `<div class="acc-sub">${bits.join(' · ')}</div>`;
     } else {
       if (a.value>0){
         const pl = a.value - bal;
-        sum = fmt(a.value);
-        sub = `<div class="acc-sub">вложено ${fmt(bal)} · <span class="${pl>=0?'pl-pos':'pl-neg'} num">${signFmt(pl)}</span></div>`;
+        sum = fmtC(a.value, cur);
+        sub = `<div class="acc-sub">вложено ${fmtC(bal,cur)} · <span class="${pl>=0?'pl-pos':'pl-neg'} num">${(pl>0?'+':'')+fmtC(pl,cur)}</span>${rubLine?' · '+('≈ '+fmt(Math.round(a.value*rateOf(cur)*100)/100)):''}</div>`;
       } else if (bal>0){
-        sub = `<div class="acc-sub">тапни, чтобы указать текущую стоимость</div>`;
+        sub = `<div class="acc-sub">тапни, чтобы указать текущую стоимость${rubLine?' · '+rubLine:''}</div>`;
+      } else if (rubLine){
+        sub = `<div class="acc-sub">${rubLine}</div>`;
       }
     }
     return `<div class="acc" data-id="${a.id}">
       <div class="acc-top">
         <span>${a.kind==='sav'?'🏦':'📈'}</span>
-        <span class="acc-name">${esc(a.name)}</span>
+        <span class="acc-name">${esc(a.name)}${foreign?' · '+cur:''}</span>
         <span class="acc-sum num">${sum}</span>
       </div>${sub}${track}
     </div>`;
@@ -945,7 +994,7 @@ function renderAdvice(scope, inc, exp){
     const pe = DB.plans.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
     const net = pi - pe;
     const left = plansLeft(now);
-    let run = DB.txs.reduce((s,t)=>s+flow(t),0)
+    let run = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0)
       + left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0)
       - left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
     let mm = now.getMonth(), yy = now.getFullYear();
@@ -1005,7 +1054,7 @@ function renderSixMonths(){
   const left = plansLeft(now);
   const li = left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
   const le = left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
-  let run = DB.txs.reduce((s,t)=>s+flow(t),0) + li - le;
+  let run = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0) + li - le;
   let rows = `<div class="yrow"><b>Конец этого месяца</b><span class="num" style="font-weight:700">${fmt(run)}</span></div>`;
   let m = now.getMonth(), y = now.getFullYear();
   for (let k=1; k<=6; k++){
@@ -1248,6 +1297,20 @@ $('searchClear').onclick = () => {
 const sheetWrap = $('sheetWrap');
 let formCur = '₽';
 let formAcc2 = null;
+// какая валюта у выбранного счёта операции (для копилок/переводов и трат из копилки)
+function opAccCur(){
+  if (formType==='sav'){ const a = accById(formAcc); return a ? (a.cur||DB.settings.cur) : DB.settings.cur; }
+  if ((formType==='exp'||formType==='inc') && formAcc){ const a = accById(formAcc); return a ? (a.cur||DB.settings.cur) : DB.settings.cur; }
+  return DB.settings.cur;
+}
+function updateAmountCur(){
+  // для операций копилки и перевода валюта = валюта счёта; поле «валюта операции» прячем
+  const savLike = formType==='sav';
+  const c = opAccCur();
+  const lbl = document.querySelector('label[for="amount"]');
+  if (lbl) lbl.textContent = 'Сумма' + (c!==DB.settings.cur ? ', ' + c : '');
+  if (savLike && $('curChips')) $('curChips').style.display = c!==DB.settings.cur ? 'none' : '';
+}
 
 function renderCurChips(){
   const base = DB.settings.cur;
@@ -1315,12 +1378,13 @@ function renderChips(){
 // счёт-цель для операций копилки
 function renderAccChips(){
   const isMove = formCat==='Перевод';
+  updateAmountCur();
   $('accLabel').textContent = isMove ? 'Откуда' : 'Какой счёт';
   const kind = SAV_ACTIONS.find(c=>c.n===formCat).kind;
   const accs = DB.accounts.filter(a=>a.kind===kind);
   if (!accs.some(a=>a.id===formAcc)) formAcc = accs.length ? accs[0].id : null;
   $('accChips').innerHTML = accs.map(a =>
-    `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">${a.kind==='sav'?'🏦':'📈'} ${esc(a.name)} · <span class="num">${fmt(accBalance(a))}</span></button>`).join('');
+    `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">${a.kind==='sav'?'🏦':'📈'} ${esc(a.name)} · <span class="num">${fmtC(accBalanceCur(a), a.cur||DB.settings.cur)}</span></button>`).join('');
   $('accChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
     formAcc = ch.dataset.a;
     if (formAcc2===formAcc) formAcc2 = null;
@@ -1331,7 +1395,7 @@ function renderAccChips(){
     const others = accs.filter(a=>a.id!==formAcc);
     if (!others.some(a=>a.id===formAcc2)) formAcc2 = others.length ? others[0].id : null;
     $('moveChips').innerHTML = others.length ? others.map(a =>
-      `<button class="chip ${a.id===formAcc2?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)} · <span class="num">${fmt(accBalance(a))}</span></button>`).join('')
+      `<button class="chip ${a.id===formAcc2?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)} · <span class="num">${fmtC(accBalanceCur(a), a.cur||DB.settings.cur)}</span></button>`).join('')
       : `<div class="plans-empty" style="padding:4px 0">Нужна вторая копилка — создай её в «Счета и копилки».</div>`;
     $('moveChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
       formAcc2 = ch.dataset.a; renderAccChips();
@@ -1341,12 +1405,13 @@ function renderAccChips(){
 // источник/назначение для расходов и доходов: «на руках» или копилка
 function renderMoneyChips(){
   $('moveField').style.display = 'none';
+  updateAmountCur();
   const accs = DB.accounts.filter(a=>a.kind==='sav');
   if (formAcc && !accs.some(a=>a.id===formAcc)) formAcc = '';
   $('accChips').innerHTML =
     `<button class="chip ${!formAcc?'sel':''}" data-a="">👛 На руках</button>` +
     accs.map(a =>
-      `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)} · <span class="num">${fmt(accBalance(a))}</span></button>`).join('');
+      `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)} · <span class="num">${fmtC(accBalanceCur(a), a.cur||DB.settings.cur)}</span></button>`).join('');
   $('accChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
     formAcc = ch.dataset.a; renderMoneyChips();
   });
@@ -1539,11 +1604,27 @@ $('baseCurSaveBtn').onclick = () => {
 
 // ============ СЧЕТА ============
 const accWrap = $('accWrap');
+let accCurPick = '₽';
+function renderAccCurChips(){
+  $('accCurChips').innerHTML = CURRENCIES.map(c =>
+    `<button class="chip ${c===accCurPick?'sel':''}" data-cur="${c}">${c}${c===DB.settings.cur?' (основная)':''}</button>`).join('');
+  $('accCurChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    accCurPick = ch.dataset.cur;
+    renderAccCurChips();
+    setAccLabels();
+  });
+}
+function setAccLabels(){
+  const c = accCurPick;
+  $('accStartLabel').textContent = 'Сколько уже на счёте (остаток), ' + c;
+  if (accKind==='sav') $('accExtraLabel').textContent = 'Цель, ' + c + ' (необязательно)';
+  else $('accExtraLabel').textContent = 'Сколько стоит сейчас, ' + c + ' (необязательно)';
+}
 function setAccKind(k){
   accKind = k;
   $('akSav').className = k==='sav' ? 'on-sav' : '';
   $('akInv').className = k==='inv' ? 'on-sav' : '';
-  $('accExtraLabel').textContent = k==='sav' ? 'Цель, ₽ (необязательно)' : 'Сколько стоит сейчас, ₽ (необязательно)';
+  setAccLabels();
   $('accHint').textContent = k==='sav'
     ? 'Например: «Отпуск», «Накопительный счёт», «Подушка».'
     : 'Например: «Брокер», «Вклад», «Крипта». Текущую стоимость обновляй время от времени — приложение посчитает прибыль.';
@@ -1556,7 +1637,10 @@ function openAccSheet(a){
   $('accTitle').textContent = a ? 'Счёт «'+a.name+'»' : 'Новый счёт';
   $('accKindSeg').style.display = a ? 'none' : 'flex';
   $('accName').value = a ? a.name : '';
+  accCurPick = a ? (a.cur||DB.settings.cur) : DB.settings.cur;
+  renderAccCurChips();
   setAccKind(a ? a.kind : 'sav');
+  $('accStart').value = a && a.start ? String(a.start).replace('.',',') : '';
   $('accExtra').value = a ? (a.kind==='sav' ? (a.goal||'') : (a.value||'')) : '';
   $('accDeleteBtn').style.display = a ? 'block' : 'none';
   accWrap.classList.add('open');
@@ -1569,13 +1653,16 @@ $('accSaveBtn').onclick = () => {
   const name = $('accName').value.trim();
   if (!name){ alert('Введи название счёта'); return; }
   const extra = parseSum($('accExtra').value) || 0;
+  const start = parseSum($('accStart').value) || 0;
   if (editingAccId){
     const a = accById(editingAccId);
     a.name = name;
+    a.cur = accCurPick;
+    a.start = start;
     if (a.kind==='sav') a.goal = extra>0 ? extra : 0;
     else a.value = extra>0 ? extra : 0;
   } else {
-    const a = {id:uid(), name, kind:accKind, goal:0, value:0};
+    const a = {id:uid(), name, kind:accKind, goal:0, value:0, cur:accCurPick, start};
     if (accKind==='sav') a.goal = extra>0 ? extra : 0;
     else a.value = extra>0 ? extra : 0;
     DB.accounts.push(a);
@@ -1597,6 +1684,19 @@ $('accDeleteBtn').onclick = () => {
     DB.accounts = DB.accounts.filter(x=>x.id!==a.id);
     save(); accWrap.classList.remove('open'); render();
   }
+};
+
+// ============ ОСТАТОК НА РУКАХ ============
+const handWrap = $('handWrap');
+$('handEditBtn').onclick = () => {
+  $('handStart').value = DB.settings.handStart ? String(DB.settings.handStart).replace('.',',') : '';
+  handWrap.classList.add('open');
+};
+$('handCancelBtn').onclick = () => handWrap.classList.remove('open');
+handWrap.onclick = e => { if (e.target===handWrap) handWrap.classList.remove('open'); };
+$('handSaveBtn').onclick = () => {
+  DB.settings.handStart = parseSum($('handStart').value) || 0;
+  save(); handWrap.classList.remove('open'); render();
 };
 
 // ============ ФОРМА ПЛАНА ============
@@ -1718,7 +1818,7 @@ $('importFile').onchange = e => {
     try {
       const data = JSON.parse(r.result);
       let next = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}}};
+                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}};
       if (Array.isArray(data)) next.txs = data;
       else if (data && Array.isArray(data.txs)){
         next.txs = data.txs;
@@ -1727,7 +1827,7 @@ $('importFile').onchange = e => {
         next.customCats = data.customCats||{exp:[],inc:[]};
         next.accounts = data.accounts||[];
         next.templates = data.templates||[];
-        next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}}, data.settings||{});
+        next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}, data.settings||{});
         next._oldGoal = data.goal||0;
         next._oldInvestValue = data.investValue||0;
       } else throw 0;
