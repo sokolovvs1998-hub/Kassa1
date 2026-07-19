@@ -20,11 +20,16 @@
     --shadow:0 1px 3px rgba(22,36,31,.06);
   }
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:not(.theme-light){
       --bg:#101714; --card:#1B2420; --ink:#E8EFEA; --ink2:#90A199;
       --line:#2B3631; --inc-bg:#15302a; --exp-bg:#39201b;
       --sav-bg:#1b2a3c; --accent:#0C1310; --shadow:0 1px 3px rgba(0,0,0,.3);
     }
+  }
+  :root.theme-dark{
+    --bg:#101714; --card:#1B2420; --ink:#E8EFEA; --ink2:#90A199;
+      --line:#2B3631; --inc-bg:#15302a; --exp-bg:#39201b;
+      --sav-bg:#1b2a3c; --accent:#0C1310; --shadow:0 1px 3px rgba(0,0,0,.3);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -264,7 +269,10 @@
   <div class="month-nav">
     <button id="prevM" aria-label="Назад">‹</button>
     <div class="month-name num" id="monthName"></div>
-    <button id="nextM" aria-label="Вперёд">›</button>
+    <div style="display:flex;gap:8px">
+      <button id="nextM" aria-label="Вперёд">›</button>
+      <button id="themeBtn" aria-label="Тема оформления">🌓</button>
+    </div>
   </div>
   <div class="mode-tabs">
     <button id="tabMonth" class="on">Месяц</button>
@@ -293,7 +301,7 @@
     <h2>Счета и копилки <span class="h-btns"><button id="addAccBtn">＋ счёт</button></span></h2>
     <div id="accList"></div>
 
-    <h2>Советы</h2>
+    <h2>Советы <span class="h-btns"><button id="aiBtn">🤖 Спросить у ИИ</button></span></h2>
     <div class="card" id="advice"></div>
 
     <h2>План на месяц <span class="h-btns"><button id="addPlanBtn">＋ платёж</button></span></h2>
@@ -447,6 +455,17 @@
   </div>
 </div>
 
+<!-- Модалка ИИ-отчёта -->
+<div class="sheet-wrap" id="aiWrap">
+  <div class="sheet">
+    <h3>🤖 Консультация с ИИ</h3>
+    <p class="hint" style="text-align:left;margin:0 0 12px">Приложение собрало отчёт по твоим финансам. Скопируй его и вставь в Claude (или любой другой ИИ-чат) — получишь разбор и советы по своим реальным цифрам. Данные никуда не отправляются, пока ты сам их не вставишь в чат.</p>
+    <textarea id="aiReport" readonly style="width:100%;height:180px;border:2px solid var(--line);border-radius:14px;padding:12px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--ink);resize:none"></textarea>
+    <button class="save-btn" id="aiCopyBtn">📋 Скопировать отчёт</button>
+    <button class="cancel-btn" id="aiCancelBtn">Закрыть</button>
+  </div>
+</div>
+
 <!-- Модалка остатка на руках -->
 <div class="sheet-wrap" id="handWrap">
   <div class="sheet">
@@ -577,7 +596,7 @@ const CURRENCIES = ['₽','$','€'];
 
 function load(){
   let db = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}};
+            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}};
   try {
     const raw = JSON.parse(localStorage.getItem(KEY));
     if (Array.isArray(raw)) db.txs = raw;
@@ -588,7 +607,7 @@ function load(){
       db.customCats = raw.customCats||{exp:[],inc:[]};
       db.accounts = raw.accounts||[];
       db.templates = raw.templates||[];
-      db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}, raw.settings||{});
+      db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}, raw.settings||{});
       db.settings.mix = Object.assign({hand:true,sav:true,inv:true}, db.settings.mix||{});
       db.settings.rates = Object.assign({'$':90,'€':100}, db.settings.rates||{});
       db._oldGoal = raw.goal||0;
@@ -1818,7 +1837,7 @@ $('importFile').onchange = e => {
     try {
       const data = JSON.parse(r.result);
       let next = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}};
+                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}};
       if (Array.isArray(data)) next.txs = data;
       else if (data && Array.isArray(data.txs)){
         next.txs = data.txs;
@@ -1827,7 +1846,7 @@ $('importFile').onchange = e => {
         next.customCats = data.customCats||{exp:[],inc:[]};
         next.accounts = data.accounts||[];
         next.templates = data.templates||[];
-        next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0}, data.settings||{});
+        next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}, data.settings||{});
         next._oldGoal = data.goal||0;
         next._oldInvestValue = data.investValue||0;
       } else throw 0;
@@ -1841,6 +1860,122 @@ $('importFile').onchange = e => {
   e.target.value = '';
 };
 
+// ============ ИИ-ОТЧЁТ ============
+const aiWrap = $('aiWrap');
+function buildAiReport(){
+  const now = new Date();
+  const cur = DB.settings.cur;
+  const L = [];
+  L.push('Проанализируй мои личные финансы и дай советы: где я могу оптимизировать траты, достаточно ли откладываю, что улучшить. Вот данные за последние месяцы (валюта: '+cur+').');
+  L.push('');
+  // 3 месяца динамики
+  let y = now.getFullYear(), m = now.getMonth();
+  for (let k=0; k<3; k++){
+    const tx = monthTx(y,m);
+    const inc = tx.filter(t=>t.type==='inc').reduce((s,t)=>s+t.sum,0);
+    const exp = tx.filter(t=>t.type==='exp').reduce((s,t)=>s+t.sum,0);
+    const put = putOf(tx);
+    if (tx.length) L.push(MONTHS[m]+' '+y+': доходы '+Math.round(inc)+', расходы '+Math.round(exp)+', отложено '+Math.round(put));
+    m--; if (m<0){ m=11; y--; }
+  }
+  // категории текущего месяца
+  const spent = {};
+  monthTx(now.getFullYear(), now.getMonth()).filter(t=>t.type==='exp').forEach(t=>spent[t.cat]=(spent[t.cat]||0)+t.sum);
+  const cats = Object.entries(spent).sort((a,b)=>b[1]-a[1]);
+  if (cats.length){
+    L.push('');
+    L.push('Траты этого месяца по категориям: ' + cats.map(([c,s])=>c+' '+Math.round(s)).join(', '));
+  }
+  // лимиты
+  const lims = Object.entries(DB.budgets);
+  if (lims.length) L.push('Мои лимиты: ' + lims.map(([c,s])=>c+' '+Math.round(s)).join(', '));
+  // счета
+  L.push('');
+  L.push('На руках: ' + Math.round((DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0)));
+  DB.accounts.forEach(a => {
+    const c = a.cur||cur;
+    const bal = Math.round(accBalanceCur(a));
+    let line = (a.kind==='sav'?'Копилка':'Инвестиции')+' «'+a.name+'»: '+bal+' '+c;
+    if (a.kind==='sav' && a.goal>0) line += ' (цель '+Math.round(a.goal)+' '+c+')';
+    if (a.kind==='inv' && a.value>0) line += ' (сейчас стоит '+Math.round(a.value)+' '+c+')';
+    L.push(line);
+  });
+  // планы
+  if (DB.plans.length){
+    L.push('');
+    L.push('Регулярные платежи каждый месяц: ' + DB.plans.map(p=>(p.type==='inc'?'+':'−')+Math.round(p.sum)+' '+p.name+' ('+p.day+'-го)').join(', '));
+  }
+  L.push('');
+  L.push('Ответь по-русски, конкретно и по пунктам.');
+  return L.join('\n');
+}
+$('aiBtn').onclick = () => {
+  $('aiReport').value = buildAiReport();
+  aiWrap.classList.add('open');
+};
+$('aiCancelBtn').onclick = () => aiWrap.classList.remove('open');
+aiWrap.onclick = e => { if (e.target===aiWrap) aiWrap.classList.remove('open'); };
+$('aiCopyBtn').onclick = () => {
+  const txt = $('aiReport').value;
+  const done = () => { $('aiCopyBtn').textContent = '✅ Скопировано — вставь в чат с ИИ'; setTimeout(()=>$('aiCopyBtn').textContent='📋 Скопировать отчёт', 2500); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>{ $('aiReport').select(); document.execCommand('copy'); done(); });
+  } else { $('aiReport').select(); document.execCommand('copy'); done(); }
+};
+
+// ============ ТЕМА ============
+const THEME_ICONS = {auto:'🌓', dark:'🌙', light:'☀️'};
+function applyTheme(){
+  const t = DB.settings.theme || 'auto';
+  document.documentElement.classList.remove('theme-dark','theme-light');
+  if (t==='dark') document.documentElement.classList.add('theme-dark');
+  if (t==='light') document.documentElement.classList.add('theme-light');
+  $('themeBtn').textContent = THEME_ICONS[t];
+  $('themeBtn').title = {auto:'Тема: как в системе', dark:'Тема: тёмная', light:'Тема: светлая'}[t];
+}
+$('themeBtn').onclick = () => {
+  const order = ['auto','dark','light'];
+  const cur = DB.settings.theme || 'auto';
+  DB.settings.theme = order[(order.indexOf(cur)+1)%3];
+  save(); applyTheme();
+};
+
+// ============ СВОРАЧИВАНИЕ РАЗДЕЛОВ ============
+function initCollapsibles(){
+  if (!DB.settings.collapsed) DB.settings.collapsed = {};
+  const containers = [document.querySelector('main'), $('monthView'), $('yearView'), $('capView')];
+  containers.forEach(root => {
+    if (!root) return;
+    [...root.children].forEach(el => {
+      if (el.tagName !== 'H2') return;
+      const key = el.textContent.replace(/[▸▾]/g,'').trim().split(' ').slice(0,2).join('_');
+      // собираем соседей до следующего H2/конца в обёртку
+      const body = document.createElement('div');
+      let next = el.nextElementSibling;
+      while (next && next.tagName !== 'H2'){
+        const cur = next; next = next.nextElementSibling;
+        body.appendChild(cur);
+      }
+      el.after(body);
+      const chev = document.createElement('span');
+      chev.style.cssText = 'margin-left:auto;padding-left:8px;transition:none';
+      el.querySelector('.h-btns') ? el.insertBefore(chev, el.querySelector('.h-btns')) : el.appendChild(chev);
+      const apply = () => {
+        const c = !!DB.settings.collapsed[key];
+        body.style.display = c ? 'none' : '';
+        chev.textContent = c ? '▸' : '▾';
+      };
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', e => {
+        if (e.target.closest('.h-btns')) return;
+        DB.settings.collapsed[key] = !DB.settings.collapsed[key];
+        save(); apply();
+      });
+      apply();
+    });
+  });
+}
+
 // ============ ОФЛАЙН ============
 if ('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
@@ -1850,6 +1985,8 @@ if ('serviceWorker' in navigator){
 save(); // сохраняем результат миграции
 const now0 = new Date();
 viewYear = now0.getFullYear(); viewMonth = now0.getMonth();
+applyTheme();
+initCollapsibles();
 render();
 </script>
 </body>
