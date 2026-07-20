@@ -2725,19 +2725,41 @@ $('bankFile').onchange = e => {
     if (!p.rows.length){ $('bankResult').innerHTML = '<div class="plans-empty">⚠️ Не нашёл операций в файле. Если это PDF-скан (картинка) — прочитать не получится. Попробуй выгрузить CSV, инструкция в FAQ.</div>'; return; }
     // Дубль = та же дата, сумма, тип И то же описание, загруженное из ТОГО ЖЕ банка.
     // Одинаковые суммы из разных банков — это разные траты, они складываются.
-    // Код авторизации из выписки уникален — по нему дубли ловятся точно,
-    // а одинаковые переводы в один день остаются разными операциями.
-    const keyOf = (t, bank) => t.ref
-      ? 'ref|'+(bank||'')+'|'+t.ref
-      : t.date+'|'+t.type+'|'+t.sum+'|'+String(t.note||'').trim().toLowerCase()+'|'+(bank||'');
-    const seen = new Set(DB.txs.map(t => keyOf(t, t.bank)));
+    // Защита от повторов при пересекающихся выписках.
+    // 1) Код авторизации уникален — если он есть, дубль ловится точно.
+    // 2) Без кода считаем ПОВТОРЯЕМОСТЬ: если в файле три одинаковые траты,
+    //    а в базе уже две — добавится только одна недостающая.
+    const plainKey = (t, bank) =>
+      t.date+'|'+t.type+'|'+t.sum+'|'+String(t.note||'').trim().toLowerCase()+'|'+(bank||'');
+    const refKey = (ref, bank) => 'ref|'+(bank||'')+'|'+ref;
+
+    const haveRefs = new Set();
+    const haveCount = new Map();
+    DB.txs.forEach(t => {
+      if (t.ref) haveRefs.add(refKey(t.ref, t.bank));
+      else {
+        const k = plainKey(t, t.bank);
+        haveCount.set(k, (haveCount.get(k)||0) + 1);
+      }
+    });
+
+    const usedCount = new Map();
     bankPending = [];
     let dup = 0;
     p.rows.forEach(r => {
       r.bank = bankPick;
-      const key = keyOf(r, bankPick);
-      if (seen.has(key)){ dup++; return; }
-      seen.add(key);
+      if (r.ref){
+        const rk = refKey(r.ref, bankPick);
+        if (haveRefs.has(rk)){ dup++; return; }
+        haveRefs.add(rk);
+        bankPending.push(r);
+        return;
+      }
+      const k = plainKey(r, bankPick);
+      const already = haveCount.get(k) || 0;
+      const used = usedCount.get(k) || 0;
+      usedCount.set(k, used + 1);
+      if (used < already){ dup++; return; }   // столько таких уже записано
       bankPending.push(r);
     });
     const exp = bankPending.filter(r=>r.type==='exp').length;
