@@ -308,6 +308,7 @@
   <div class="balance-label" id="handEditBtn" role="button" style="cursor:pointer">👛 На руках (переходит из месяца в месяц) · изменить</div>
   <div class="balance num" id="wallet">0 ₽</div>
   <div class="wallet-line" id="balanceLabel">Итог за месяц: <b class="num" id="balance">0 ₽</b></div>
+  <div class="savings-line" id="cashLine" style="display:none">💳 На счетах: <b class="num" id="cashTotal">0 ₽</b></div>
   <div class="savings-line">🏦 Накопления: <b class="num" id="savingsTotal">0 ₽</b></div>
   <div class="savings-line">📈 Инвестиции: <b class="num" id="investText">0 ₽</b><span id="investPL"></span></div>
   <div class="totals">
@@ -503,8 +504,13 @@
   <div class="sheet">
     <h3 id="accTitle">Новый счёт</h3>
     <div class="seg" id="accKindSeg">
-      <button id="akSav" class="on-sav">🏦 Накопления</button>
+      <button id="akCash">💳 Счёт/карта</button>
+      <button id="akSav" class="on-sav">🏦 Копилка</button>
       <button id="akInv">📈 Инвестиции</button>
+    </div>
+    <div class="field" id="accBankField" style="display:none">
+      <label>Банк</label>
+      <div class="chips" id="accBankChips"></div>
     </div>
     <div class="field">
       <label for="accName">Название</label>
@@ -576,6 +582,14 @@
       <b>＋ Доход</b> — поступление. «Куда положить» — на руки или сразу в копилку.<br>
       <b>🏦 Копилка</b> — движение денег между своими местами: Отложить / Взять (копилки), Вложить / Вывести (инвестиции), Перевод (из копилки в копилку).<br>
       Тап по любой записи в истории — <b>редактирование</b>. Удалил случайно — внизу появится кнопка <b>«Вернуть»</b>.
+    </div></details>
+
+    <details><summary>💳 Несколько банков и счетов — как вести</summary><div>
+      <b>Заведи каждый счёт отдельно:</b> «Счета и копилки» → <b>＋ счёт</b> → вид <b>💳 Счёт/карта</b> → название («Сбер зарплатная»), банк и текущий остаток. Так можно завести хоть 3 счёта в Сбере, 2 в Т-Банке и 1 в Альфе.<br><br>
+      <b>При загрузке выписки</b> выбираешь банк <i>и конкретный счёт</i> — операции лягут именно на него. Если счёта ещё нет, прямо там есть кнопка <b>＋ новый счёт</b>.<br><br>
+      <b>Ничего не перемешается:</b> каждая операция помнит свой счёт и банк. Повторы ловятся <i>внутри одного счёта</i> — одинаковые суммы в один день на разных счетах остаются разными тратами.<br><br>
+      <b>Где что видно:</b> в шапке «💳 На счетах» — общая сумма по картам, ниже в списке — каждый счёт со своим балансом. Во вкладке <b>Капитал</b> — всё вместе: кошелёк, карты, копилки, инвестиции.<br><br>
+      <b>👛 Кошелёк</b> — это деньги вне счетов (наличные). Если не хочешь возиться со счетами, можно грузить всё туда, как раньше.
     </div></details>
 
     <details><summary>🏦 Счета, копилки и валюта</summary><div>
@@ -661,6 +675,10 @@
     <div class="field">
       <label>Из какого банка выписка</label>
       <div class="chips" id="bankChips"></div>
+    </div>
+    <div class="field">
+      <label>На какой счёт зачислять</label>
+      <div class="chips" id="bankAccChips"></div>
     </div>
     <button class="save-btn" id="bankPickBtn" style="margin-top:0">📄 Выбрать файл (CSV или PDF)</button>
     <input type="file" id="bankFile" accept=".csv,.txt,.pdf" style="display:none">
@@ -902,6 +920,10 @@ function rateOf(cur){
 const accBalanceCur = acc => (acc.start||0) + accBalance(acc);
 const accBalanceBase = acc => Math.round(accBalanceCur(acc) * rateOf(acc.cur||DB.settings.cur) * 100) / 100;
 const kindTotal = kind => DB.accounts.filter(a=>a.kind===kind).reduce((s,a)=>s+accBalanceBase(a),0);
+// Кошелёк — деньги, не привязанные ни к какому счёту (наличные, стартовый остаток)
+const walletBalance = () => (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0);
+// «На руках» = кошелёк + все текущие счета/карты
+const handTotal = () => walletBalance() + kindTotal('cash');
 // отложено за набор операций (в копилки/инвестиции минус взятое)
 const putOf = list => list.reduce((s,t)=> s + (t.type==='move'?0 : t.type==='save'||t.type==='invest'?t.sum : t.type==='take'||t.type==='divest'?-t.sum : 0), 0);
 
@@ -1008,8 +1030,10 @@ function render(){
   $('nextM').style.visibility = (isCap||isSet) ? 'hidden' : 'visible';
   if (isSet){ safe('настройки', renderSettings); safe('диагностика', renderDiag); }
 
-  const handNow = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0);
-  $('wallet').textContent = fmt(handNow);
+  $('wallet').textContent = fmt(handTotal());
+  const cashN = DB.accounts.filter(a=>a.kind==='cash').length;
+  $('cashLine').style.display = cashN ? '' : 'none';
+  if (cashN) $('cashTotal').textContent = fmt(kindTotal('cash')) + ' · счетов: ' + cashN;
   $('savingsTotal').textContent = fmt(kindTotal('sav'));
 
   const invAccs = DB.accounts.filter(a=>a.kind==='inv');
@@ -1062,7 +1086,7 @@ function render(){
 function renderCapital(){
   const mix = DB.settings.mix;
   const groups = [
-    {k:'hand', i:'👛', n:'На руках'},
+    {k:'hand', i:'👛', n:'Кошелёк и счета'},
     {k:'sav',  i:'🏦', n:'Накопления'},
     {k:'inv',  i:'📈', n:'Инвестиции'}
   ];
@@ -1073,7 +1097,7 @@ function renderCapital(){
     save(); render();
   });
 
-  const hand = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0);
+  const hand = handTotal();
   const invValBase = a => Math.round((a.value>0 ? a.value : accBalanceCur(a)) * rateOf(a.cur||DB.settings.cur) * 100) / 100;
   let total = 0;
   if (mix.hand) total += hand;
@@ -1083,15 +1107,15 @@ function renderCapital(){
 
   const dim = on => on ? '' : 'opacity:.35';
   let html = `<div class="acc" style="${dim(mix.hand)};cursor:default">
-    <div class="acc-top"><span>👛</span><span class="acc-name">На руках</span><span class="acc-sum num">${fmt(hand)}</span></div>
-    <div class="acc-sub">все доходы минус траты и разложенное по счетам</div>
+    <div class="acc-top"><span>👛</span><span class="acc-name">Кошелёк и наличные</span><span class="acc-sum num">${fmt(walletBalance())}</span></div>
+    <div class="acc-sub">деньги вне счетов</div>
   </div>`;
   DB.accounts.forEach(a => {
-    const on = a.kind==='sav' ? mix.sav : mix.inv;
+    const on = a.kind==='cash' ? mix.hand : a.kind==='sav' ? mix.sav : mix.inv;
     const cur = a.cur || DB.settings.cur;
     const foreign = cur !== DB.settings.cur;
     const bal = accBalanceCur(a);
-    let sum = fmtC(bal,cur), sub = a.kind==='sav' ? 'копилка' : 'инвестиции';
+    let sum = fmtC(bal,cur), sub = a.kind==='cash' ? ('счёт' + (a.bank?' · '+a.bank:'')) : a.kind==='sav' ? 'копилка' : 'инвестиции';
     if (a.kind==='inv' && a.value>0){
       const pl = a.value - bal;
       sum = fmtC(a.value,cur);
@@ -1101,7 +1125,7 @@ function renderCapital(){
     }
     if (foreign) sub += ` · ≈ ${fmt(accBalanceBase(a))}`;
     html += `<div class="acc" data-id="${a.id}" style="${dim(on)}">
-      <div class="acc-top"><span>${a.kind==='sav'?'🏦':'📈'}</span><span class="acc-name">${esc(a.name)}${foreign?' · '+cur:''}</span><span class="acc-sum num">${sum}</span></div>
+      <div class="acc-top"><span>${a.kind==='cash'?'💳':a.kind==='sav'?'🏦':'📈'}</span><span class="acc-name">${esc(a.name)}${foreign?' · '+cur:''}</span><span class="acc-sum num">${sum}</span></div>
       <div class="acc-sub">${sub}</div>
     </div>`;
   });
@@ -1210,13 +1234,27 @@ function goalForecast(acc){
 // ---- Счета ----
 function renderAccounts(){
   const box = $('accList');
-  box.innerHTML = DB.accounts.map(a => {
+  const wal = walletBalance();
+  const order = {cash:1, sav:2, inv:3};
+  const walletCard = `<div class="acc" id="walletCard">
+      <div class="acc-top"><span>👛</span><span class="acc-name">Кошелёк и наличные</span>
+        <span class="acc-sum num">${fmt(wal)}</span></div>
+      <div class="acc-sub">деньги вне счетов · тапни, чтобы поправить остаток</div>
+    </div>`;
+  box.innerHTML = walletCard + [...DB.accounts].sort((a,b)=>(order[a.kind]||9)-(order[b.kind]||9)).map(a => {
     const cur = a.cur || DB.settings.cur;
     const bal = accBalanceCur(a);
     const foreign = cur !== DB.settings.cur;
     let sub = '', track = '', sum = fmtC(bal, cur);
     const rubLine = foreign ? `≈ ${fmt(accBalanceBase(a))}` : '';
-    if (a.kind==='sav'){
+    if (a.kind==='cash'){
+      const bits = [];
+      if (a.bank) bits.push('🏛 ' + a.bank);
+      if (rubLine) bits.push(rubLine);
+      const n = DB.txs.filter(t => t.src===a.id || t.dst===a.id).length;
+      if (n) bits.push(n + ' операц.');
+      if (bits.length) sub = `<div class="acc-sub">${bits.join(' · ')}</div>`;
+    } else if (a.kind==='sav'){
       const bits = [];
       if (a.goal>0){
         const pct = Math.min(100, Math.max(0, Math.round(bal/a.goal*100)));
@@ -1245,13 +1283,15 @@ function renderAccounts(){
     }
     return `<div class="acc" data-id="${a.id}">
       <div class="acc-top">
-        <span>${a.kind==='sav'?'🏦':'📈'}</span>
+        <span>${a.kind==='cash'?'💳':a.kind==='sav'?'🏦':'📈'}</span>
         <span class="acc-name">${esc(a.name)}${foreign?' · '+cur:''}</span>
         <span class="acc-sum num">${sum}</span>
       </div>${sub}${track}
     </div>`;
   }).join('');
-  box.querySelectorAll('.acc').forEach(el => el.onclick = () => openAccSheet(accById(el.dataset.id)));
+  box.querySelectorAll('.acc[data-id]').forEach(el => el.onclick = () => openAccSheet(accById(el.dataset.id)));
+  const wc = document.getElementById('walletCard');
+  if (wc) wc.onclick = () => $('handEditBtn').click();
 }
 
 // ---- Советы ----
@@ -1313,7 +1353,7 @@ function renderAdvice(scope, inc, exp){
     const pe = DB.plans.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
     const net = pi - pe;
     const left = plansLeft(now);
-    let run = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0)
+    let run = handTotal()
       + left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0)
       - left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
     let mm = now.getMonth(), yy = now.getFullYear();
@@ -1373,7 +1413,7 @@ function renderSixMonths(){
   const left = plansLeft(now);
   const li = left.filter(p=>p.type==='inc').reduce((s,p)=>s+p.sum,0);
   const le = left.filter(p=>p.type==='exp').reduce((s,p)=>s+p.sum,0);
-  let run = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0) + li - le;
+  let run = handTotal() + li - le;
   let rows = `<div class="yrow"><b>Конец этого месяца</b><span class="num" style="font-weight:700">${fmt(run)}</span></div>`;
   let m = now.getMonth(), y = now.getFullYear();
   for (let k=1; k<=6; k++){
@@ -1823,12 +1863,12 @@ function renderAccChips(){
 function renderMoneyChips(){
   $('moveField').style.display = 'none';
   updateAmountCur();
-  const accs = DB.accounts.filter(a=>a.kind==='sav');
+  const accs = DB.accounts.filter(a=>a.kind==='cash' || a.kind==='sav');
   if (formAcc && !accs.some(a=>a.id===formAcc)) formAcc = '';
   $('accChips').innerHTML =
-    `<button class="chip ${!formAcc?'sel':''}" data-a="">👛 На руках</button>` +
+    `<button class="chip ${!formAcc?'sel':''}" data-a="">👛 Кошелёк</button>` +
     accs.map(a =>
-      `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">🏦 ${esc(a.name)} · <span class="num">${fmtC(accBalanceCur(a), a.cur||DB.settings.cur)}</span></button>`).join('');
+      `<button class="chip ${a.id===formAcc?'sel':''}" data-a="${a.id}">${a.kind==='cash'?'💳':'🏦'} ${esc(a.name)} · <span class="num">${fmtC(accBalanceCur(a), a.cur||DB.settings.cur)}</span></button>`).join('');
   $('accChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
     formAcc = ch.dataset.a; renderMoneyChips();
   });
@@ -2047,19 +2087,38 @@ function renderAccCurChips(){
 }
 function setAccLabels(){
   const c = accCurPick;
-  $('accStartLabel').textContent = 'Сколько уже на счёте (остаток), ' + c;
-  if (accKind==='sav') $('accExtraLabel').textContent = 'Цель, ' + c + ' (необязательно)';
-  else $('accExtraLabel').textContent = 'Сколько стоит сейчас, ' + c + ' (необязательно)';
+  $('accStartLabel').textContent = 'Сколько сейчас на счёте (остаток), ' + c;
+  const ex = $('accExtraLabel').parentElement;
+  if (accKind==='cash'){ ex.style.display = 'none'; }
+  else {
+    ex.style.display = '';
+    $('accExtraLabel').textContent = accKind==='sav'
+      ? 'Цель, ' + c + ' (необязательно)'
+      : 'Сколько стоит сейчас, ' + c + ' (необязательно)';
+  }
+}
+let accBankPick = '';
+function renderAccBankChips(){
+  const list = ['', ...BANKS];
+  $('accBankChips').innerHTML = list.map(b =>
+    `<button class="chip ${b===accBankPick?'sel':''}" data-b="${b}">${b || 'Без банка'}</button>`).join('');
+  $('accBankChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    accBankPick = ch.dataset.b; renderAccBankChips();
+  });
 }
 function setAccKind(k){
   accKind = k;
-  $('akSav').className = k==='sav' ? 'on-sav' : '';
-  $('akInv').className = k==='inv' ? 'on-sav' : '';
+  $('akCash').className = k==='cash' ? 'on-sav' : '';
+  $('akSav').className  = k==='sav'  ? 'on-sav' : '';
+  $('akInv').className  = k==='inv'  ? 'on-sav' : '';
+  $('accBankField').style.display = k==='cash' ? 'block' : 'none';
   setAccLabels();
-  $('accHint').textContent = k==='sav'
-    ? 'Например: «Отпуск», «Накопительный счёт», «Подушка».'
-    : 'Например: «Брокер», «Вклад», «Крипта». Текущую стоимость обновляй время от времени — приложение посчитает прибыль.';
+  $('accHint').textContent =
+    k==='cash' ? 'Карта или счёт в банке: «Сбер зарплатная», «Т-Банк основная», «Альфа рублёвый». Сюда будут ложиться операции из выписки этого счёта.' :
+    k==='sav'  ? 'Например: «Отпуск», «Накопительный счёт», «Подушка».'
+               : 'Например: «Брокер», «Вклад», «Крипта». Текущую стоимость обновляй время от времени — приложение посчитает прибыль.';
 }
+$('akCash').onclick = () => { if (!editingAccId) setAccKind('cash'); };
 $('akSav').onclick = () => { if (!editingAccId) setAccKind('sav'); };
 $('akInv').onclick = () => { if (!editingAccId) setAccKind('inv'); };
 
@@ -2069,8 +2128,10 @@ function openAccSheet(a){
   $('accKindSeg').style.display = a ? 'none' : 'flex';
   $('accName').value = a ? a.name : '';
   accCurPick = a ? (a.cur||DB.settings.cur) : DB.settings.cur;
+  accBankPick = a ? (a.bank||'') : '';
   renderAccCurChips();
-  setAccKind(a ? a.kind : 'sav');
+  renderAccBankChips();
+  setAccKind(a ? a.kind : 'cash');
   $('accStart').value = a && a.start ? String(a.start).replace('.',',') : '';
   $('accExtra').value = a ? (a.kind==='sav' ? (a.goal||'') : (a.value||'')) : '';
   $('accDeleteBtn').style.display = a ? 'block' : 'none';
@@ -2090,12 +2151,14 @@ $('accSaveBtn').onclick = () => {
     a.name = name;
     a.cur = accCurPick;
     a.start = start;
+    if (a.kind==='cash') a.bank = accBankPick || undefined;
     if (a.kind==='sav') a.goal = extra>0 ? extra : 0;
-    else a.value = extra>0 ? extra : 0;
+    else if (a.kind==='inv') a.value = extra>0 ? extra : 0;
   } else {
     const a = {id:uid(), name, kind:accKind, goal:0, value:0, cur:accCurPick, start};
+    if (accKind==='cash') a.bank = accBankPick || undefined;
     if (accKind==='sav') a.goal = extra>0 ? extra : 0;
-    else a.value = extra>0 ? extra : 0;
+    else if (accKind==='inv') a.value = extra>0 ? extra : 0;
     DB.accounts.push(a);
   }
   save(); accWrap.classList.remove('open'); render();
@@ -2107,7 +2170,7 @@ $('accDeleteBtn').onclick = () => {
     alert('На этом счёте есть записи. Сначала удали их или перенеси (отредактируй каждую и выбери другой счёт).');
     return;
   }
-  if (DB.accounts.filter(x=>x.kind===a.kind).length<=1){
+  if (a.kind!=='cash' && DB.accounts.filter(x=>x.kind===a.kind).length<=1){
     alert('Нельзя удалить последний счёт этого вида.');
     return;
   }
@@ -2306,7 +2369,7 @@ function buildAiReport(){
   if (lims.length) L.push('Мои лимиты: ' + lims.map(([c,s])=>c+' '+Math.round(s)).join(', '));
   // счета
   L.push('');
-  L.push('На руках: ' + Math.round((DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0)));
+  L.push('На руках всего: ' + Math.round(handTotal()));
   DB.accounts.forEach(a => {
     const c = a.cur||cur;
     const bal = Math.round(accBalanceCur(a));
@@ -2641,12 +2704,41 @@ function parseBankCsv(text){
 }
 const BANKS = ['Сбер','Т-Банк','ВТБ','Альфа','Другой'];
 let bankPick = 'Сбер';
+let bankAccPick = '';
 function renderBankChips(){
   $('bankChips').innerHTML = BANKS.map(b =>
     `<button class="chip ${b===bankPick?'sel':''}" data-b="${b}">${b}</button>`).join('');
   $('bankChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
-    bankPick = ch.dataset.b; renderBankChips();
+    bankPick = ch.dataset.b;
+    const own = DB.accounts.filter(a=>a.kind==='cash' && a.bank===bankPick);
+    bankAccPick = own.length ? own[0].id : bankAccPick;
+    renderBankChips(); renderBankAccChips();
   });
+  renderBankAccChips();
+}
+function renderBankAccChips(){
+  const cash = DB.accounts.filter(a=>a.kind==='cash');
+  if (bankAccPick && !cash.some(a=>a.id===bankAccPick)) bankAccPick = '';
+  // по умолчанию — счёт выбранного банка
+  if (!bankAccPick){
+    const own = cash.find(a=>a.bank===bankPick);
+    if (own) bankAccPick = own.id;
+  }
+  $('bankAccChips').innerHTML =
+    cash.map(a => `<button class="chip ${a.id===bankAccPick?'sel':''}" data-a="${a.id}">💳 ${esc(a.name)}${a.bank&&a.bank!==bankPick?' ('+esc(a.bank)+')':''}</button>`).join('') +
+    `<button class="chip ${!bankAccPick?'sel':''}" data-a="">👛 Кошелёк</button>` +
+    `<button class="chip add" id="bankAccNew">＋ новый счёт</button>`;
+  $('bankAccChips').querySelectorAll('.chip[data-a]').forEach(ch => ch.onclick = () => {
+    bankAccPick = ch.dataset.a; renderBankAccChips();
+  });
+  $('bankAccNew').onclick = () => {
+    const name = (prompt('Название счёта (например, «'+bankPick+' основная»):', bankPick + ' основная')||'').trim();
+    if (!name) return;
+    const a = {id:uid(), name, kind:'cash', bank:bankPick, cur:DB.settings.cur, start:0, goal:0, value:0};
+    DB.accounts.push(a);
+    bankAccPick = a.id;
+    save(); renderBankAccChips();
+  };
 }
 // сводка: сколько операций уже загружено из каждого банка
 function bankStats(){
@@ -2656,6 +2748,7 @@ function bankStats(){
 }
 $('bankBtn').onclick = () => {
   bankPending = [];
+  bankAccPick = '';
   renderBankChips();
   const st = bankStats();
   const keys = Object.keys(st);
@@ -2729,16 +2822,17 @@ $('bankFile').onchange = e => {
     // 1) Код авторизации уникален — если он есть, дубль ловится точно.
     // 2) Без кода считаем ПОВТОРЯЕМОСТЬ: если в файле три одинаковые траты,
     //    а в базе уже две — добавится только одна недостающая.
-    const plainKey = (t, bank) =>
-      t.date+'|'+t.type+'|'+t.sum+'|'+String(t.note||'').trim().toLowerCase()+'|'+(bank||'');
-    const refKey = (ref, bank) => 'ref|'+(bank||'')+'|'+ref;
+    const accOf = t => t.src || t.dst || '';
+    const plainKey = (t, bank, acc) =>
+      t.date+'|'+t.type+'|'+t.sum+'|'+String(t.note||'').trim().toLowerCase()+'|'+(bank||'')+'|'+(acc||'');
+    const refKey = (ref, bank, acc) => 'ref|'+(bank||'')+'|'+(acc||'')+'|'+ref;
 
     const haveRefs = new Set();
     const haveCount = new Map();
     DB.txs.forEach(t => {
-      if (t.ref) haveRefs.add(refKey(t.ref, t.bank));
+      if (t.ref) haveRefs.add(refKey(t.ref, t.bank, accOf(t)));
       else {
-        const k = plainKey(t, t.bank);
+        const k = plainKey(t, t.bank, accOf(t));
         haveCount.set(k, (haveCount.get(k)||0) + 1);
       }
     });
@@ -2749,13 +2843,13 @@ $('bankFile').onchange = e => {
     p.rows.forEach(r => {
       r.bank = bankPick;
       if (r.ref){
-        const rk = refKey(r.ref, bankPick);
+        const rk = refKey(r.ref, bankPick, bankAccPick);
         if (haveRefs.has(rk)){ dup++; return; }
         haveRefs.add(rk);
         bankPending.push(r);
         return;
       }
-      const k = plainKey(r, bankPick);
+      const k = plainKey(r, bankPick, bankAccPick);
       const already = haveCount.get(k) || 0;
       const used = usedCount.get(k) || 0;
       usedCount.set(k, used + 1);
@@ -2820,8 +2914,15 @@ $('bankImportBtn').onclick = () => {
       known.add(r.cat);
     }
   });
-  bankPending.forEach(r => DB.txs.push({ id: uid(), type: r.type, sum: r.sum, cat: r.cat,
-    note: r.note, date: r.date, bank: r.bank, ref: r.ref }));
+  bankPending.forEach(r => {
+    const rec = { id: uid(), type: r.type, sum: r.sum, cat: r.cat,
+      note: r.note, date: r.date, bank: r.bank, ref: r.ref };
+    if (bankAccPick){                       // операции конкретного счёта
+      if (r.type==='exp') rec.src = bankAccPick;
+      else rec.dst = bankAccPick;
+    }
+    DB.txs.push(rec);
+  });
   save();
   bankWrap.classList.remove('open');
   bankPending = [];
