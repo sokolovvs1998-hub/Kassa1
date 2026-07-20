@@ -142,6 +142,30 @@
   .yrow:last-child{border-bottom:none}
   .yrow b{font-weight:600}
 
+  /* Календарь трат */
+  .cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+  .cal-head span{text-align:center;font-size:10px;color:var(--ink2)}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-day{
+    aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-size:11px;
+    background:var(--bg);color:var(--ink2);cursor:default;
+  }
+  .cal-day.has{color:#fff;font-weight:600}
+  .cal-day.today{outline:2px solid var(--sav)}
+  .cal-day b{font-size:12px;line-height:1.1}
+  .cal-day i{font-size:8px;font-style:normal;opacity:.9}
+  .cal-legend{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);margin-top:10px}
+  .cal-legend i{width:14px;height:10px;border-radius:3px;display:inline-block}
+
+  /* Подписки */
+  .sub-row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line)}
+  .sub-row:last-child{border-bottom:none}
+  .sub-info{flex:1;min-width:0}
+  .sub-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sub-sub{font-size:11px;color:var(--ink2)}
+  .sub-sum{font-size:14px;font-weight:700;white-space:nowrap}
+
   /* Плановые платежи */
   .plan{
     background:var(--card);border-radius:var(--radius);padding:12px 14px;
@@ -312,6 +336,12 @@
     <h2 data-sec="six">Прогноз на 6 месяцев</h2>
     <div class="card" id="sixForecast"></div>
 
+    <h2 data-sec="cal">Календарь трат</h2>
+    <div class="card" id="calendar"></div>
+
+    <h2 data-sec="subs">Регулярные списания</h2>
+    <div class="card" id="subs"></div>
+
     <h2 data-sec="chart">Расходы по категориям <span class="h-btns"><button id="budgetBtn">Лимиты</button></span></h2>
     <div class="card" id="chart"><div class="plans-empty">В этом месяце расходов пока нет.</div></div>
 
@@ -394,8 +424,25 @@
     <div class="backup">
       <button id="faqBtn">❓ FAQ — инструкция</button>
     </div>
+
+    <h2>Диагностика</h2>
+    <div class="card" id="diag"></div>
+    <div class="backup" style="margin-top:8px">
+      <button id="diagCopyBtn">📋 Скопировать отчёт о сбоях</button>
+    </div>
+
+    <h2>Опасная зона</h2>
+    <div class="backup">
+      <button id="resetBtn" style="border-color:var(--exp);color:var(--exp)">🗑 Начать заново</button>
+    </div>
+    <p class="hint">Удаление данных. Перед этим лучше сделать бэкап.</p>
   </div>
 </main>
+
+<div id="errBanner" style="display:none;position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));background:var(--exp);color:#fff;padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.4;z-index:70;align-items:flex-start;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.3)">
+  <span style="flex:1"></span>
+  <button onclick="document.getElementById('errBanner').style.display='none'" style="border:none;background:none;color:#fff;font-size:16px;cursor:pointer;padding:0 2px">✕</button>
+</div>
 
 <button class="fab" id="addBtn" aria-label="Добавить операцию" title="Добавить операцию">＋</button>
 <div id="snack" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));background:var(--ink);color:var(--card);padding:12px 18px;border-radius:14px;font-size:14px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.3);display:none;align-items:center;gap:14px">
@@ -482,6 +529,28 @@
   </div>
 </div>
 
+<!-- Модалка сброса -->
+<div class="sheet-wrap" id="resetWrap">
+  <div class="sheet">
+    <h3>🗑 Начать заново</h3>
+    <p class="hint" style="text-align:left;margin:0 0 14px">Данные хранятся только на этом телефоне — восстановить их после удаления можно будет <b>только из файла бэкапа</b>. Сохрани копию, если есть сомнения.</p>
+    <button class="save-btn" id="resetBackupBtn" style="margin:0 0 16px">⬇ Сначала сохранить бэкап</button>
+
+    <div class="field">
+      <label>Что удалить</label>
+      <div class="chips" id="resetScopeChips"></div>
+    </div>
+    <div class="card" id="resetInfo" style="margin-bottom:14px;font-size:13px;color:var(--ink2);line-height:1.6"></div>
+
+    <div class="field">
+      <label for="resetConfirm">Напиши УДАЛИТЬ, чтобы подтвердить</label>
+      <input type="text" id="resetConfirm" placeholder="УДАЛИТЬ" autocapitalize="characters">
+    </div>
+    <button class="danger-btn" id="resetGoBtn" style="display:block">Удалить безвозвратно</button>
+    <button class="cancel-btn" id="resetCancelBtn">Отмена</button>
+  </div>
+</div>
+
 <!-- Модалка FAQ -->
 <div class="sheet-wrap" id="faqWrap">
   <div class="sheet">
@@ -540,6 +609,13 @@
       Если почистить данные браузера — записи пропадут. Бэкап — твоя страховка.
     </div></details>
 
+    <details><summary>🗑 Как начать заново</summary><div>
+      ⚙️ Настройки → внизу <b>«Начать заново»</b>. Два варианта:<br>
+      • <b>Только операции</b> — сотрёт историю трат, но оставит счета, копилки с остатками, планы, лимиты и оформление. Удобно, если хочешь переписать историю, не настраивая всё заново.<br>
+      • <b>Вообще всё</b> — приложение станет как при первом запуске.<br><br>
+      Перед удалением там же есть кнопка <b>сохранить бэкап</b> — файл можно будет загрузить обратно через «Восстановить». Без бэкапа данные не вернуть.
+    </div></details>
+
     <details><summary>📲 Установка на телефон</summary><div>
       <b>iPhone:</b> открой сайт в Safari → кнопка «Поделиться» → <b>«На экран „Домой“»</b>.<br>
       <b>Android:</b> открой в Chrome → меню ⋮ → <b>«Установить приложение»</b>.<br>
@@ -563,6 +639,14 @@
       <details><summary>Другой банк</summary><div>
         Ищи слова «Выписка», «История операций», «Сохранить/Отправить/Экспорт». Годится любой файл-таблица, где есть колонки <b>дата</b>, <b>сумма</b> (расходы с минусом) и <b>описание</b>. «Касса» сама найдёт нужные колонки.
       </div></details>
+      <details><summary>❗ У меня выгружается только PDF</summary><div>
+        <b>Ничего страшного — «Касса» читает и PDF.</b> Просто выбери PDF-файл в «Загрузить выписку из банка», приложение вытащит операции само.<br><br>
+        Два условия:<br>
+        • PDF должен быть <b>обычный, из банка</b> (в нём текст можно выделить пальцем). Если это <b>фотография или скан</b> — там нет текста, только картинка, прочитать не получится.<br>
+        • Для чтения PDF первый раз нужен <b>интернет</b> — подгружается небольшая библиотека, дальше работает и офлайн.<br><br>
+        <b>Но CSV всё же лучше</b> — он разбирается точнее. Хитрость: в мобильном приложении банка обычно только PDF, а вот в <b>веб-версии банка через браузер</b> в форматах почти всегда есть CSV или Excel. Загляни туда.<br><br>
+        Если после загрузки PDF какие-то операции легли не в ту категорию — просто тапни по записи и поправь, приложение запомнит твою правку для этой записи.
+      </div></details>
     </div></details>
 
     <button class="cancel-btn" id="faqCancelBtn" style="margin-top:8px">Закрыть</button>
@@ -573,13 +657,13 @@
 <div class="sheet-wrap" id="bankWrap">
   <div class="sheet">
     <h3>⬇️ Выписка из банка</h3>
-    <p class="hint" style="text-align:left;margin:0 0 12px">Выписки из разных банков <b>складываются</b>: загружай хоть Сбер, хоть Т-Банк, хоть все сразу — операции дополняют друг друга, ничего не затирается. Повторная загрузка того же файла дублей не создаст. Файл обрабатывается на телефоне и никуда не отправляется.</p>
+    <p class="hint" style="text-align:left;margin:0 0 12px">Подходит <b>CSV</b> или <b>PDF</b> из банка (PDF — обычный, не скан/фото). Выписки из разных банков <b>складываются</b>: загружай хоть Сбер, хоть Т-Банк, хоть все сразу — операции дополняют друг друга, ничего не затирается. Повторная загрузка того же файла дублей не создаст. Файл обрабатывается на телефоне и никуда не отправляется.</p>
     <div class="field">
       <label>Из какого банка выписка</label>
       <div class="chips" id="bankChips"></div>
     </div>
-    <button class="save-btn" id="bankPickBtn" style="margin-top:0">Выбрать файл выписки (CSV)</button>
-    <input type="file" id="bankFile" accept=".csv,.txt" style="display:none">
+    <button class="save-btn" id="bankPickBtn" style="margin-top:0">📄 Выбрать файл (CSV или PDF)</button>
+    <input type="file" id="bankFile" accept=".csv,.txt,.pdf" style="display:none">
     <div id="bankResult" style="margin-top:12px"></div>
     <button class="save-btn" id="bankImportBtn" style="display:none">Импортировать</button>
     <button class="cancel-btn" id="bankCancelBtn">Закрыть</button>
@@ -737,7 +821,7 @@ const CURRENCIES = ['₽','$','€'];
 
 function load(){
   let db = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}};
+            templates:[], rules:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}};
   try {
     const raw = JSON.parse(localStorage.getItem(KEY));
     if (Array.isArray(raw)) db.txs = raw;
@@ -748,6 +832,7 @@ function load(){
       db.customCats = raw.customCats||{exp:[],inc:[]};
       db.accounts = raw.accounts||[];
       db.templates = raw.templates||[];
+      db.rules = raw.rules||[];
       db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}, raw.settings||{});
       db.settings.mix = Object.assign({hand:true,sav:true,inv:true}, db.settings.mix||{});
       db.settings.rates = Object.assign({'$':90,'€':100}, db.settings.rates||{});
@@ -783,6 +868,7 @@ const fmtC = (n,cur) => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2})
 const fmt = n => fmtC(n, DB.settings.cur);
 const signFmt = n => (n>0?'+':'') + fmt(n);
 const MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const MONTHS_TO = ['январю','февралю','марту','апрелю','маю','июню','июлю','августу','сентябрю','октябрю','ноябрю','декабрю'];
 const parseSum = v => parseFloat(String(v).replace(',','.').replace(/\s/g,''));
 const esc = s => String(s).replace(/[&<>"']/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -878,6 +964,32 @@ function plansLeft(now){
   });
 }
 
+// ============ УСТОЙЧИВОСТЬ И ДИАГНОСТИКА ============
+// Сбой в одном разделе не должен ломать всё приложение.
+const ERR_LOG = [];
+function logErr(where, e){
+  const msg = (e && (e.message || e.toString())) || 'неизвестная ошибка';
+  ERR_LOG.push({ where, msg, when: new Date().toLocaleString('ru-RU') });
+  if (ERR_LOG.length > 20) ERR_LOG.shift();
+  showErrBanner(where, msg);
+}
+function safe(where, fn){
+  try { fn(); }
+  catch(e){ logErr(where, e); }
+}
+function showErrBanner(where, msg){
+  const b = document.getElementById('errBanner');
+  if (!b) return;
+  b.querySelector('span').textContent = 'Сбой в разделе «'+where+'»: '+msg;
+  b.style.display = 'flex';
+}
+window.addEventListener('error', e => {
+  logErr('приложение', e.error || {message: e.message});
+});
+window.addEventListener('unhandledrejection', e => {
+  logErr('фоновая задача', e.reason || {message: 'сбой'});
+});
+
 // ============ ОТРИСОВКА ============
 function render(){
   const isYear = viewMode==='year';
@@ -894,7 +1006,7 @@ function render(){
   $('monthName').textContent = isSet ? 'Настройки' : (isCap ? 'Мой капитал' : (isYear ? viewYear : MONTHS[viewMonth]+' '+viewYear));
   $('prevM').style.visibility = (isCap||isSet) ? 'hidden' : 'visible';
   $('nextM').style.visibility = (isCap||isSet) ? 'hidden' : 'visible';
-  if (isSet) renderSettings();
+  if (isSet){ safe('настройки', renderSettings); safe('диагностика', renderDiag); }
 
   const handNow = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0);
   $('wallet').textContent = fmt(handNow);
@@ -927,20 +1039,22 @@ function render(){
 
   if (isCap){
     $('forecast').style.display='none';
-    renderCapital();
+    safe('капитал', renderCapital);
   } else if (isYear){
     $('forecast').style.display='none';
-    renderYear();
+    safe('год', renderYear);
   } else {
-    renderForecast(inc - exp);
-    renderDue();
-    renderTemplates();
-    renderAccounts();
-    renderAdvice(scope, inc, exp);
-    renderSixMonths();
-    renderPlans();
-    renderChart(scope);
-    renderHistory(scope);
+    safe('прогноз', () => renderForecast(inc - exp));
+    safe('план к записи', renderDue);
+    safe('быстрые траты', renderTemplates);
+    safe('счета', renderAccounts);
+    safe('советы', () => renderAdvice(scope, inc, exp));
+    safe('прогноз 6 мес', renderSixMonths);
+    safe('планы', renderPlans);
+    safe('календарь', () => renderCalendar(scope));
+    safe('списания', renderSubs);
+    safe('категории', () => renderChart(scope));
+    safe('история', () => renderHistory(scope));
   }
 }
 
@@ -1060,6 +1174,39 @@ function renderTemplates(){
   });
 }
 
+// ---- Когда накоплю: темп пополнения счёта и дата достижения цели ----
+function goalForecast(acc){
+  if (!acc.goal || acc.goal <= 0) return null;
+  const bal = accBalanceCur(acc);
+  if (bal >= acc.goal) return {done: true};
+  // приток на счёт по месяцам за последние 6 месяцев
+  const now = new Date();
+  const per = {};
+  DB.txs.forEach(t => {
+    let d = 0;
+    if (t.type==='save' || t.type==='invest'){ if (t.acc===acc.id) d = t.sum; }
+    else if (t.type==='take' || t.type==='divest'){ if (t.acc===acc.id) d = -t.sum; }
+    else if (t.type==='move'){ if (t.to===acc.id) d = t.sum; else if (t.acc===acc.id) d = -t.sum; }
+    else if (t.type==='inc' && t.dst===acc.id) d = t.sum;
+    else if (t.type==='exp' && t.src===acc.id) d = -t.sum;
+    if (!d) return;
+    const dt = new Date(t.date+'T00:00');
+    const diffM = (now.getFullYear()-dt.getFullYear())*12 + (now.getMonth()-dt.getMonth());
+    if (diffM < 0 || diffM > 5) return;
+    const k = t.date.slice(0,7);
+    per[k] = (per[k]||0) + d;
+  });
+  const months = Object.keys(per).length;
+  if (!months) return null;
+  const rate = Object.values(per).reduce((s,v)=>s+v,0) / months;
+  if (rate <= 0) return {rate};
+  const need = acc.goal - bal;
+  const left = Math.ceil(need / rate);
+  if (left > 600) return {rate, tooLong: true};
+  const target = new Date(now.getFullYear(), now.getMonth() + left, 1);
+  return {rate, left, when: MONTHS_TO[target.getMonth()] + ' ' + target.getFullYear()};
+}
+
 // ---- Счета ----
 function renderAccounts(){
   const box = $('accList');
@@ -1075,6 +1222,13 @@ function renderAccounts(){
         const pct = Math.min(100, Math.max(0, Math.round(bal/a.goal*100)));
         bits.push(`цель ${fmtC(a.goal,cur)} · ${pct}%`);
         track = `<div class="acc-track"><div style="width:${pct}%"></div></div>`;
+        const g = goalForecast(a);
+        if (g){
+          if (g.done) bits.push('🎉 цель достигнута');
+          else if (g.when) bits.push(`🎯 при темпе ${fmtC(Math.round(g.rate),cur)}/мес — к ${g.when}`);
+          else if (g.tooLong) bits.push('🐢 при таком темпе цель очень далеко');
+          else if (g.rate <= 0) bits.push('⚠️ со счёта уходит больше, чем приходит');
+        }
       }
       if (rubLine) bits.push(rubLine);
       if (bits.length) sub = `<div class="acc-sub">${bits.join(' · ')}</div>`;
@@ -1260,6 +1414,104 @@ function renderPlans(){
       DB.plans = DB.plans.filter(p=>p.id!==b.dataset.id);
       save(); render();
     }
+  });
+}
+
+// ---- Календарь трат ----
+function renderCalendar(scope){
+  const box = $('calendar');
+  const byDay = {};
+  scope.filter(t=>t.type==='exp').forEach(t => {
+    const dd = +t.date.slice(8,10);
+    byDay[dd] = (byDay[dd]||0) + t.sum;
+  });
+  const days = new Date(viewYear, viewMonth+1, 0).getDate();
+  const vals = Object.values(byDay);
+  if (!vals.length){
+    box.innerHTML = '<div class="plans-empty">В этом месяце трат ещё нет.</div>';
+    return;
+  }
+  const max = Math.max(...vals);
+  const first = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7; // пн=0
+  const now = new Date();
+  const isCurMonth = now.getFullYear()===viewYear && now.getMonth()===viewMonth;
+  let cells = '';
+  for (let i=0; i<first; i++) cells += '<div></div>';
+  for (let d=1; d<=days; d++){
+    const v = byDay[d]||0;
+    const k = v ? 0.25 + 0.75*(v/max) : 0;
+    const style = v ? `background:var(--exp);opacity:${(0.28 + 0.72*k).toFixed(2)}` : '';
+    const short = v >= 1000 ? Math.round(v/1000)+'к' : (v ? Math.round(v) : '');
+    cells += `<div class="cal-day ${v?'has':''} ${isCurMonth&&d===now.getDate()?'today':''}" style="${style}" title="${d}: ${fmt(v)}">
+      <b>${d}</b>${v?`<i>${short}</i>`:''}</div>`;
+  }
+  const worst = Object.entries(byDay).sort((a,b)=>b[1]-a[1])[0];
+  box.innerHTML =
+    `<div class="cal-head">${['пн','вт','ср','чт','пт','сб','вс'].map(d=>`<span>${d}</span>`).join('')}</div>` +
+    `<div class="cal">${cells}</div>` +
+    `<div class="cal-legend"><i style="background:var(--bg)"></i>пусто
+      <i style="background:var(--exp);opacity:.4"></i>меньше
+      <i style="background:var(--exp)"></i>больше · самый дорогой день: <b>${worst[0]} числа, ${fmt(worst[1])}</b></div>`;
+}
+
+// ---- Регулярные списания (подписки) ----
+function findSubs(){
+  const groups = {};
+  DB.txs.filter(t => t.type==='exp').forEach(t => {
+    const k = merchantKey(t.note) || t.cat;
+    if (!k) return;
+    (groups[k] = groups[k] || []).push(t);
+  });
+  const subs = [];
+  Object.entries(groups).forEach(([k, list]) => {
+    // группируем по похожей сумме (±5%)
+    const buckets = [];
+    list.forEach(t => {
+      const b = buckets.find(b => Math.abs(b.sum - t.sum) <= Math.max(b.sum*0.05, 1));
+      if (b){ b.items.push(t); b.sum = (b.sum*(b.items.length-1) + t.sum)/b.items.length; }
+      else buckets.push({sum: t.sum, items: [t]});
+    });
+    buckets.forEach(b => {
+      const months = new Set(b.items.map(t => t.date.slice(0,7)));
+      if (months.size >= 2){
+        const dates = b.items.map(t=>t.date).sort();
+        subs.push({
+          name: k, sum: Math.round(b.sum*100)/100,
+          months: months.size, times: b.items.length,
+          last: dates[dates.length-1],
+          day: +dates[dates.length-1].slice(8,10),
+          cat: b.items[0].cat
+        });
+      }
+    });
+  });
+  return subs.sort((a,b)=>b.sum-a.sum);
+}
+function renderSubs(){
+  const box = $('subs');
+  const subs = findSubs();
+  if (!subs.length){
+    box.innerHTML = '<div class="plans-empty">Пока не вижу повторяющихся списаний. Они появятся, когда наберётся история за 2+ месяца.</div>';
+    return;
+  }
+  const total = subs.reduce((s,x)=>s+x.sum,0);
+  const inPlan = n => DB.plans.some(p => p.name.toLowerCase() === n.toLowerCase());
+  box.innerHTML =
+    `<div class="plans-empty" style="text-align:left;padding:0 0 10px">Нашёл <b>${subs.length}</b> регулярных списаний примерно на <b class="num">${fmt(total)}</b> в месяц. Это подписки, платежи и всё, что списывается стабильно.</div>` +
+    subs.slice(0,10).map((s,i) => `
+      <div class="sub-row">
+        <div class="sub-info">
+          <div class="sub-name">${esc(s.name)}</div>
+          <div class="sub-sub">${s.times} раз · ${s.months} мес · ${esc(s.cat)} · последний ${s.last.slice(8,10)}.${s.last.slice(5,7)}</div>
+        </div>
+        <div class="sub-sum num">${fmt(s.sum)}</div>
+        ${inPlan(s.name) ? '<span style="color:var(--inc);font-size:18px">✓</span>'
+          : `<button class="chip" data-sub="${i}" style="padding:6px 10px">＋ в план</button>`}
+      </div>`).join('');
+  box.querySelectorAll('[data-sub]').forEach(b => b.onclick = () => {
+    const s = subs[+b.dataset.sub];
+    DB.plans.push({ id: uid(), type:'exp', name: s.name, sum: s.sum, day: s.day, shift:'none' });
+    save(); render();
   });
 }
 
@@ -1676,6 +1928,20 @@ $('saveBtn').onclick = () => {
 
   if (editingId){
     const i = DB.txs.findIndex(t=>t.id===editingId);
+    const prev = i>=0 ? DB.txs[i] : null;
+    // пользователь поправил категорию у банковской операции — запоминаем правило
+    if (prev && prev.bank && rec.type==='exp' && prev.cat !== rec.cat && rec.note){
+      learnRule(rec.note, rec.cat);
+      // и сразу применяем к таким же операциям
+      const k = merchantKey(rec.note);
+      let n = 0;
+      DB.txs.forEach(t => {
+        if (t.id!==editingId && t.type==='exp' && t.bank && merchantKey(t.note)===k && t.cat!==rec.cat){
+          t.cat = rec.cat; n++;
+        }
+      });
+      if (n) setTimeout(()=>alert('Запомнил: «'+k+'» → '+rec.cat+'.\nОбновил ещё '+n+' похожих операций.'), 60);
+    }
     if (i>=0) DB.txs[i] = rec; else DB.txs.push(rec);
   } else DB.txs.push(rec);
   save();
@@ -1985,7 +2251,7 @@ $('importFile').onchange = e => {
     try {
       const data = JSON.parse(r.result);
       let next = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}};
+                  templates:[], rules:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}};
       if (Array.isArray(data)) next.txs = data;
       else if (data && Array.isArray(data.txs)){
         next.txs = data.txs;
@@ -1994,6 +2260,7 @@ $('importFile').onchange = e => {
         next.customCats = data.customCats||{exp:[],inc:[]};
         next.accounts = data.accounts||[];
         next.templates = data.templates||[];
+        next.rules = data.rules||[];
         next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}, data.settings||{});
         next._oldGoal = data.goal||0;
         next._oldInvestValue = data.investValue||0;
@@ -2071,6 +2338,97 @@ $('aiCopyBtn').onclick = () => {
   } else { $('aiReport').select(); document.execCommand('copy'); done(); }
 };
 
+// ============ ДИАГНОСТИКА ============
+function renderDiag(){
+  const box = $('diag');
+  if (!box) return;
+  const env = [
+    'Записей: ' + DB.txs.length,
+    'Счетов: ' + DB.accounts.length,
+    'Правил: ' + (DB.rules||[]).length,
+    'Хранилище: ' + (storageOk() ? 'работает' : 'недоступно (данные не сохранятся)')
+  ];
+  box.innerHTML = '<div class="plans-empty" style="text-align:left;padding:0">' + env.join('<br>') + '</div>' +
+    (ERR_LOG.length
+      ? '<div class="yrows">' + ERR_LOG.slice().reverse().slice(0,5).map(e =>
+          `<div class="yrow"><b>${esc(e.where)}</b><span style="color:var(--exp);font-size:12px;text-align:right">${esc(e.msg)}</span></div>`).join('') + '</div>'
+      : '<div class="plans-empty" style="padding:10px 0 0">✅ Сбоев не зафиксировано.</div>');
+}
+function storageOk(){
+  try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; }
+  catch(e){ return false; }
+}
+$('diagCopyBtn').onclick = () => {
+  const txt = 'Касса — отчёт о сбоях\n' +
+    'Браузер: ' + navigator.userAgent + '\n' +
+    'Записей: ' + DB.txs.length + ', счетов: ' + DB.accounts.length + '\n' +
+    'Хранилище: ' + (storageOk() ? 'ок' : 'недоступно') + '\n\n' +
+    (ERR_LOG.length ? ERR_LOG.map(e => e.when + ' · ' + e.where + ': ' + e.msg).join('\n') : 'Сбоев нет');
+  const done = () => { $('diagCopyBtn').textContent = '✅ Скопировано'; setTimeout(()=>$('diagCopyBtn').textContent='📋 Скопировать отчёт о сбоях', 2000); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done).catch(done);
+  else done();
+};
+
+// ============ СБРОС ДАННЫХ ============
+const resetWrap = $('resetWrap');
+const RESET_SCOPES = [
+  {k:'txs',  n:'Только операции'},
+  {k:'all',  n:'Вообще всё'}
+];
+let resetScope = 'txs';
+function renderResetSheet(){
+  $('resetScopeChips').innerHTML = RESET_SCOPES.map(s =>
+    `<button class="chip ${s.k===resetScope?'sel':''}" data-k="${s.k}">${s.n}</button>`).join('');
+  $('resetScopeChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    resetScope = ch.dataset.k; renderResetSheet();
+  });
+  const nTx = DB.txs.length, nAcc = DB.accounts.length,
+        nPlan = DB.plans.length, nTpl = (DB.templates||[]).length,
+        nRule = (DB.rules||[]).length;
+  $('resetInfo').innerHTML = resetScope === 'txs'
+    ? `<b>Удалится:</b> все операции (${nTx}).<br><b>Останется:</b> счета и копилки (${nAcc}) с их остатками, плановые платежи (${nPlan}), лимиты, свои категории, шаблоны (${nTpl}), правила категорий (${nRule}), оформление.<br><br>Подходит, если хочешь переписать историю с чистого листа, не настраивая всё заново.`
+    : `<b>Удалится вообще всё:</b> операции (${nTx}), счета и копилки (${nAcc}), планы (${nPlan}), лимиты, свои категории, шаблоны (${nTpl}), правила (${nRule}), цели, курсы валют и настройки оформления.<br><br>Приложение станет как при первом запуске.`;
+}
+$('resetBtn').onclick = () => {
+  resetScope = 'txs';
+  $('resetConfirm').value = '';
+  renderResetSheet();
+  resetWrap.classList.add('open');
+};
+$('resetCancelBtn').onclick = () => resetWrap.classList.remove('open');
+resetWrap.onclick = e => { if (e.target===resetWrap) resetWrap.classList.remove('open'); };
+$('resetBackupBtn').onclick = () => $('exportBtn').click();
+$('resetGoBtn').onclick = () => {
+  const word = $('resetConfirm').value.trim().toUpperCase();
+  if (word !== 'УДАЛИТЬ'){
+    alert('Для подтверждения напиши УДАЛИТЬ в поле ниже.');
+    return;
+  }
+  const what = resetScope === 'txs'
+    ? 'Удалить все операции ('+DB.txs.length+')? Счета и настройки останутся.'
+    : 'Удалить ВСЕ данные без возможности восстановления?';
+  if (!confirm(what)) return;
+
+  if (resetScope === 'txs'){
+    DB.txs = [];
+  } else {
+    try { localStorage.removeItem(KEY); } catch(e){}
+    DB = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
+          templates:[], rules:[],
+          settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true},
+                    handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}};
+    migrate(DB);
+    applyTheme();
+    applyAllSecs();
+  }
+  save();
+  resetWrap.classList.remove('open');
+  const now = new Date();
+  viewYear = now.getFullYear(); viewMonth = now.getMonth(); viewMode = 'month';
+  render();
+  setTimeout(() => alert(resetScope === 'txs' ? 'Операции удалены. Счета и настройки на месте.' : 'Готово — приложение как новое.'), 60);
+};
+
 // ============ FAQ ============
 const faqWrap = $('faqWrap');
 $('faqBtn').onclick = () => faqWrap.classList.add('open');
@@ -2106,6 +2464,133 @@ function splitCsvLine(line, sep){
   out.push(cur);
   return out.map(s => s.trim());
 }
+// Категории банков → категории приложения
+const BANK_CAT_MAP = [
+  [/супермаркет|продукт|магазин.?прод/i, 'Еда'],
+  [/ресторан|кафе|фастфуд|общепит|кофейн/i, 'Кафе'],
+  [/транспорт|такси|каршер|метро|проезд|автомобил|азс|топлив|парковк/i, 'Транспорт'],
+  [/здоровь|красот|аптек|медиц|клиник/i, 'Здоровье'],
+  [/коммунал|связь|интернет|жкх|аренд|квартплат/i, 'Связь'],
+  [/отдых|развлеч|кино|спорт|путешеств|хобби/i, 'Развлечения'],
+  [/одежд|обув|техник|электрон|маркетплейс|товар|покупк/i, 'Покупки'],
+  [/налич|банкомат|снятие/i, 'Наличные'],
+  [/перевод/i, 'Переводы']
+];
+// Ключ продавца из описания: убираем номера, коды, города — остаётся узнаваемое имя
+function merchantKey(note){
+  let s = String(note||'');
+  const dot = s.indexOf('·');
+  if (dot >= 0) s = s.slice(dot+1);          // после категории банка
+  s = s.replace(/\*+/g,' ')
+       .replace(/\b\d[\d\s.,]*\b/g,' ')     // числа
+       .replace(/\b(RUS|MOSCOW|MOSKVA|SANKT|PETERBU|SPB|ST|OOO|ООО|АО|IP|ИП|Операция|по|карте)\b/gi,' ')
+       .replace(/[^\wа-яёА-ЯЁ ]+/gi,' ')
+       .replace(/\s+/g,' ').trim().toLowerCase();
+  const words = s.split(' ').filter(w => w.length > 2);
+  return words.slice(0,3).join(' ').slice(0,40);
+}
+// Правило пользователя для этого описания
+function ruleFor(note){
+  const k = merchantKey(note);
+  if (!k) return null;
+  const r = (DB.rules||[]).find(r => k.includes(r.key) || r.key.includes(k));
+  return r ? r.cat : null;
+}
+function learnRule(note, cat){
+  const k = merchantKey(note);
+  if (!k || k.length < 3) return;
+  DB.rules = DB.rules || [];
+  const i = DB.rules.findIndex(r => r.key === k);
+  if (i >= 0) DB.rules[i].cat = cat;
+  else DB.rules.push({key: k, cat});
+}
+function mapBankCat(bankCat, desc){
+  const learned = ruleFor((bankCat||'') + ' · ' + (desc||''));
+  if (learned) return learned;
+  if (bankCat){
+    for (const [re, cat] of BANK_CAT_MAP) if (re.test(bankCat)) return cat;
+  }
+  return autoCat((bankCat||'') + ' ' + (desc||''));
+}
+
+// Разбор ТЕКСТА выписки (из PDF).
+// Главный случай — формат Сбера: строка «дата время КАТЕГОРИЯ сумма остаток»,
+// следующая строка — «дата обработки код_авторизации описание».
+// У расходов знака нет, у поступлений стоит «+».
+function parseBankText(text){
+  const raw = text.split(/\n/).map(l => l.replace(/[\u00a0\u202f]/g,' ').replace(/\s+/g,' ').trim());
+  const lines = raw.filter(l => l.length > 3);
+  const rows = [];
+  const MONEY = '(\\d{1,3}(?: \\d{3})*[.,]\\d{2}|\\d+[.,]\\d{2})';
+  // строка операции: дата, время, категория, сумма (возможно +), остаток
+  const reOp = new RegExp('^(\\d{2})\\.(\\d{2})\\.(\\d{4}) (\\d{2}:\\d{2}) (.+?) ([+\\-−]?)' + MONEY + ' ' + MONEY + '$');
+  // строка деталей: дата обработки, код авторизации, описание
+  const reDet = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{4,8}) (.+)$/;
+  const num = s => parseFloat(String(s).replace(/ /g,'').replace(',','.'));
+
+  for (let i = 0; i < lines.length; i++){
+    const m = lines[i].match(reOp);
+    if (!m) continue;
+    const [, dd, mm, yyyy, , bankCat, sign, amount] = m;
+    const val = num(amount);
+    if (!val || isNaN(val)) continue;
+    // описание и код авторизации — на следующей строке (может переноситься)
+    let desc = '', ref = '';
+    const d1 = lines[i+1] && lines[i+1].match(reDet);
+    if (d1){
+      ref = d1[4];
+      desc = d1[5];
+      // хвост описания на следующей строке, если она не начинается с даты
+      const tail = lines[i+2];
+      if (tail && !/^\d{2}\.\d{2}\.\d{4}/.test(tail) && !/^(ДАТА|КАТЕГОРИЯ|СУММА|ОСТАТОК|Выписка|Продолжение|Страница|В сумму)/i.test(tail)){
+        desc += ' ' + tail;
+      }
+    }
+    desc = desc.replace(/Операция по карте.*$/i,'')
+               .replace(/\*{2,}\d+/g,'')
+               .replace(/\s+/g,' ').trim().slice(0,70);
+    const isInc = sign === '+';
+    rows.push({
+      date: yyyy+'-'+mm+'-'+dd,
+      type: isInc ? 'inc' : 'exp',
+      sum: val,
+      cat: isInc ? 'Другое' : mapBankCat(bankCat, desc),
+      note: (bankCat ? bankCat + (desc ? ' · ' + desc : '') : desc).slice(0,80),
+      ref: ref || undefined
+    });
+  }
+  if (rows.length) return {rows};
+
+  // Запасной разбор: простые построчные выписки других банков
+  const reDate = /(\d{2})[.\/](\d{2})[.\/](\d{2,4})|(\d{4})-(\d{2})-(\d{2})/;
+  const reMoney = /([+\-−]?\s?\d{1,3}(?:[ ]\d{3})*(?:[.,]\d{2})|[+\-−]?\s?\d+[.,]\d{2})/g;
+  lines.forEach(line => {
+    const dm = line.match(reDate);
+    if (!dm) return;
+    let iso;
+    if (dm[1]){
+      let yy = dm[3]; if (yy.length === 2) yy = '20' + yy;
+      iso = yy + '-' + dm[2] + '-' + dm[1];
+    } else iso = dm[4] + '-' + dm[5] + '-' + dm[6];
+    if (!/^20\d\d-\d\d-\d\d$/.test(iso)) return;
+    const rest = line.replace(reDate, ' ').replace(reDate, ' ');
+    const money = rest.match(reMoney);
+    if (!money || !money.length) return;
+    const val = parseFloat(money[0].replace(/ /g,'').replace('−','-').replace(',','.'));
+    if (!val || isNaN(val)) return;
+    let desc = rest;
+    money.forEach(x => { desc = desc.replace(x, ' '); });
+    desc = desc.replace(/\b\d{1,2}:\d{2}(:\d{2})?\b/g,' ')
+               .replace(/[₽руб.]{1,4}\b/gi,' ')
+               .replace(/\s+/g,' ').trim().slice(0,60);
+    let type = val < 0 ? 'exp' : 'inc';
+    if (val > 0 && /списан|покупк|оплат|перевод отправ|снятие/i.test(line) && !/зачислен|поступлен|пополнен/i.test(line)) type = 'exp';
+    rows.push({ date: iso, type, sum: Math.abs(val),
+      cat: type==='exp' ? autoCat(desc) : 'Другое', note: desc });
+  });
+  return {rows};
+}
+
 function parseBankCsv(text){
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return {err: 'Файл пустой или слишком короткий.'};
@@ -2184,33 +2669,88 @@ $('bankBtn').onclick = () => {
 $('bankCancelBtn').onclick = () => bankWrap.classList.remove('open');
 bankWrap.onclick = e => { if (e.target===bankWrap) bankWrap.classList.remove('open'); };
 $('bankPickBtn').onclick = () => $('bankFile').click();
+// подгружаем библиотеку чтения PDF по требованию
+const PDF_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+function loadPdfLib(){
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = PDF_CDN + 'pdf.min.js';
+    s.onload = () => {
+      const lib = window.pdfjsLib;
+      if (!lib){ rej(); return; }
+      // тихий режим: без предупреждений в консоли
+      if (lib.VerbosityLevel) lib.verbosity = lib.VerbosityLevel.ERRORS;
+      // воркер грузим через blob — иначе браузер блокирует его с чужого домена
+      // и pdf.js ругается в консоль про «fake worker»
+      fetch(PDF_CDN + 'pdf.worker.min.js')
+        .then(r => r.ok ? r.text() : Promise.reject())
+        .then(code => {
+          lib.GlobalWorkerOptions.workerSrc =
+            URL.createObjectURL(new Blob([code], {type:'application/javascript'}));
+        })
+        .catch(() => { lib.GlobalWorkerOptions.workerSrc = PDF_CDN + 'pdf.worker.min.js'; })
+        .then(() => res(lib));
+    };
+    s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+async function pdfToText(file){
+  const lib = await loadPdfLib();
+  const buf = await file.arrayBuffer();
+  const doc = await lib.getDocument({data: buf, verbosity: 0, isEvalSupported: false}).promise;
+  let out = '';
+  for (let i = 1; i <= doc.numPages; i++){
+    const page = await doc.getPage(i);
+    const tc = await page.getTextContent();
+    // собираем строки по вертикальной координате
+    const byY = {};
+    tc.items.forEach(it => {
+      const y = Math.round(it.transform[5]);
+      (byY[y] = byY[y] || []).push({x: it.transform[4], s: it.str});
+    });
+    Object.keys(byY).sort((a,b) => b - a).forEach(y => {
+      out += byY[y].sort((a,b) => a.x - b.x).map(o => o.s).join(' ') + '\n';
+    });
+  }
+  return out;
+}
+
 $('bankFile').onchange = e => {
   const f = e.target.files[0]; if (!f) return;
-  const handle = text => {
-    const p = parseBankCsv(text);
+  const handle = (text, isPdf) => {
+    const p = isPdf ? parseBankText(text) : parseBankCsv(text);
     if (p.err){ $('bankResult').innerHTML = '<div class="plans-empty">⚠️ '+p.err+'</div>'; return; }
+    if (!p.rows.length){ $('bankResult').innerHTML = '<div class="plans-empty">⚠️ Не нашёл операций в файле. Если это PDF-скан (картинка) — прочитать не получится. Попробуй выгрузить CSV, инструкция в FAQ.</div>'; return; }
     // Дубль = та же дата, сумма, тип И то же описание, загруженное из ТОГО ЖЕ банка.
     // Одинаковые суммы из разных банков — это разные траты, они складываются.
-    const keyOf = (date, type, sum, note, bank) =>
-      date+'|'+type+'|'+sum+'|'+String(note||'').trim().toLowerCase()+'|'+(bank||'');
-    const seen = new Set(DB.txs.map(t => keyOf(t.date, t.type, t.sum, t.note, t.bank)));
+    // Код авторизации из выписки уникален — по нему дубли ловятся точно,
+    // а одинаковые переводы в один день остаются разными операциями.
+    const keyOf = (t, bank) => t.ref
+      ? 'ref|'+(bank||'')+'|'+t.ref
+      : t.date+'|'+t.type+'|'+t.sum+'|'+String(t.note||'').trim().toLowerCase()+'|'+(bank||'');
+    const seen = new Set(DB.txs.map(t => keyOf(t, t.bank)));
     bankPending = [];
     let dup = 0;
     p.rows.forEach(r => {
       r.bank = bankPick;
-      const key = keyOf(r.date, r.type, r.sum, r.note, bankPick);
+      const key = keyOf(r, bankPick);
       if (seen.has(key)){ dup++; return; }
       seen.add(key);
       bankPending.push(r);
     });
     const exp = bankPending.filter(r=>r.type==='exp').length;
     const inc = bankPending.filter(r=>r.type==='inc').length;
+    const sExp = bankPending.filter(r=>r.type==='exp').reduce((s,r)=>s+r.sum,0);
+    const sInc = bankPending.filter(r=>r.type==='inc').reduce((s,r)=>s+r.sum,0);
     const st = bankStats();
     const already = Object.keys(st).length
       ? '<br>Уже в приложении: ' + Object.keys(st).map(k=>k+' — '+st[k]).join(', ') + ' (эти записи останутся).'
       : '';
     let html = '<div class="plans-empty" style="text-align:left;padding:0 0 10px">Выписка: <b>'+esc(bankPick)+'</b>. Найдено операций: '+p.rows.length+
-      (dup ? ' (пропущено дублей: '+dup+')' : '')+'.<br>К добавлению: <b>'+bankPending.length+'</b> — '+exp+' расходов, '+inc+' доходов.'+already+'</div>';
+      (dup ? ' (пропущено дублей: '+dup+')' : '')+'.<br>К добавлению: <b>'+bankPending.length+'</b> — '+
+      exp+' расходов на '+fmt(sExp)+', '+inc+' доходов на '+fmt(sInc)+'.'+already+'</div>';
     if (bankPending.length){
       html += '<div class="yrows">'+bankPending.slice(0,8).map(r =>
         '<div class="yrow"><b>'+r.date.slice(8,10)+'.'+r.date.slice(5,7)+' · '+esc(r.cat)+'</b><span class="num" style="color:'+(r.type==='exp'?'var(--exp)':'var(--inc)')+'">'+(r.type==='exp'?'−':'+')+fmt(r.sum)+'</span></div>').join('')+
@@ -2220,21 +2760,46 @@ $('bankFile').onchange = e => {
     $('bankImportBtn').style.display = bankPending.length ? 'block' : 'none';
     $('bankImportBtn').textContent = 'Импортировать '+bankPending.length+' операций';
   };
+  if (/\.pdf$/i.test(f.name) || f.type === 'application/pdf'){
+    $('bankResult').innerHTML = '<div class="plans-empty">📄 Читаю PDF, подожди пару секунд…</div>';
+    pdfToText(f)
+      .then(txt => {
+        if (!txt || txt.replace(/\s/g,'').length < 40){
+          $('bankResult').innerHTML = '<div class="plans-empty">⚠️ В этом PDF нет текстового слоя — похоже, это скан или картинка. Такой файл прочитать нельзя. Выгрузи выписку в CSV (см. FAQ) или введи операции вручную.</div>';
+          return;
+        }
+        handle(txt, true);
+      })
+      .catch(() => {
+        $('bankResult').innerHTML = '<div class="plans-empty">⚠️ Не удалось открыть PDF. Для чтения PDF нужен интернет (первый раз загружается библиотека). Проверь связь и попробуй снова — или используй CSV.</div>';
+      });
+    e.target.value = '';
+    return;
+  }
   const r1 = new FileReader();
   r1.onload = () => {
     const txt = r1.result;
     if (txt.includes('\uFFFD')){
       const r2 = new FileReader();
-      r2.onload = () => handle(r2.result);
+      r2.onload = () => handle(r2.result, false);
       r2.readAsText(f, 'windows-1251');
-    } else handle(txt);
+    } else handle(txt, false);
   };
   r1.readAsText(f, 'utf-8');
   e.target.value = '';
 };
 $('bankImportBtn').onclick = () => {
+  // если банк принёс категорию, которой нет в приложении — заводим её
+  const known = new Set(getCats('exp').map(c=>c.n));
+  const ICO = {'Наличные':'💵','Переводы':'↔️'};
+  bankPending.forEach(r => {
+    if (r.type==='exp' && !known.has(r.cat)){
+      DB.customCats.exp.push({n:r.cat, i:ICO[r.cat]||'🏷'});
+      known.add(r.cat);
+    }
+  });
   bankPending.forEach(r => DB.txs.push({ id: uid(), type: r.type, sum: r.sum, cat: r.cat,
-    note: r.note, date: r.date, bank: r.bank }));
+    note: r.note, date: r.date, bank: r.bank, ref: r.ref }));
   save();
   bankWrap.classList.remove('open');
   bankPending = [];
@@ -2365,7 +2930,9 @@ const TOGGLABLE = [
   {k:'advice', n:'💡 Советы'},
   {k:'plans',  n:'📅 План на месяц'},
   {k:'six',    n:'📈 Прогноз на 6 месяцев'},
-  {k:'chart',  n:'🥧 Расходы по категориям'}
+  {k:'chart',  n:'🥧 Расходы по категориям'},
+  {k:'cal',    n:'📅 Календарь трат'},
+  {k:'subs',   n:'🔁 Регулярные списания'}
 ];
 function renderSettings(){
   $('secChips').innerHTML = TOGGLABLE.map(s =>
@@ -2375,6 +2942,21 @@ function renderSettings(){
     save(); applyAllSecs(); renderSettings();
   });
 }
+
+// ============ ТИШИНА В КОНСОЛИ ============
+// Служебные предупреждения сторонних библиотек (например, чтения PDF)
+// не несут пользы пользователю — прячем их, ошибки оставляем.
+(function(){
+  const NOISE = /fake worker|deprecated|Warning: TT|UnsupportedFeature|Setting up|font|cmap/i;
+  ['warn','info','log'].forEach(m => {
+    const orig = console[m].bind(console);
+    console[m] = (...a) => {
+      const s = a.map(x => typeof x === 'string' ? x : (x && x.message) || '').join(' ');
+      if (NOISE.test(s)) return;
+      orig(...a);
+    };
+  });
+})();
 
 // ============ ОФЛАЙН ============
 if ('serviceWorker' in navigator){
