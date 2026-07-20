@@ -36,7 +36,7 @@
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     background:var(--bg); color:var(--ink);
-    padding-bottom:calc(90px + env(safe-area-inset-bottom));
+    padding-bottom:calc(48px + env(safe-area-inset-bottom));
     -webkit-font-smoothing:antialiased;
   }
   .num{font-variant-numeric:tabular-nums}
@@ -194,13 +194,14 @@
   .empty b{display:block;font-size:30px;margin-bottom:8px}
 
   .fab{
-    position:fixed;left:50%;transform:translateX(-50%);
-    bottom:calc(20px + env(safe-area-inset-bottom));
+    position:fixed;right:16px;
+    bottom:calc(18px + env(safe-area-inset-bottom));
     background:var(--accent);color:#fff;border:none;
-    padding:16px 34px;border-radius:30px;font-size:16px;font-weight:600;
-    box-shadow:0 8px 24px rgba(22,36,31,.35);cursor:pointer;z-index:50;
+    width:56px;height:56px;border-radius:18px;font-size:26px;font-weight:600;
+    line-height:1;padding:0;
+    box-shadow:0 6px 18px rgba(0,0,0,.28);cursor:pointer;z-index:50;
   }
-  .fab:active{transform:translateX(-50%) scale(.96)}
+  .fab:active{transform:scale(.94)}
 
   /* Модалки */
   .sheet-wrap{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:100;align-items:flex-end}
@@ -278,6 +279,7 @@
     <button id="tabMonth" class="on">Месяц</button>
     <button id="tabYear">Год</button>
     <button id="tabCap">Капитал</button>
+    <button id="tabSet">⚙️</button>
   </div>
   <div class="balance-label" id="handEditBtn" role="button" style="cursor:pointer">👛 На руках (переходит из месяца в месяц) · изменить</div>
   <div class="balance num" id="wallet">0 ₽</div>
@@ -295,22 +297,22 @@
   <div id="monthView">
     <div id="dueBox"></div>
 
-    <h2>Быстрые траты <span class="h-btns"><button id="tplBtn">настроить</button></span></h2>
+    <h2 data-sec="tpl">Быстрые траты <span class="h-btns"><button id="tplBtn">настроить</button></span></h2>
     <div class="chips" id="tplChips" style="padding:0 2px 2px"></div>
 
     <h2>Счета и копилки <span class="h-btns"><button id="addAccBtn">＋ счёт</button></span></h2>
     <div id="accList"></div>
 
-    <h2>Советы <span class="h-btns"><button id="aiBtn">🤖 Спросить у ИИ</button></span></h2>
+    <h2 data-sec="advice">Советы <span class="h-btns"><button id="aiBtn">🤖 Спросить у ИИ</button></span></h2>
     <div class="card" id="advice"></div>
 
-    <h2>План на месяц <span class="h-btns"><button id="addPlanBtn">＋ платёж</button></span></h2>
+    <h2 data-sec="plans">План на месяц <span class="h-btns"><button id="addPlanBtn">＋ платёж</button></span></h2>
     <div id="plansList"></div>
 
-    <h2>Прогноз на 6 месяцев</h2>
+    <h2 data-sec="six">Прогноз на 6 месяцев</h2>
     <div class="card" id="sixForecast"></div>
 
-    <h2>Расходы по категориям <span class="h-btns"><button id="budgetBtn">Лимиты</button></span></h2>
+    <h2 data-sec="chart">Расходы по категориям <span class="h-btns"><button id="budgetBtn">Лимиты</button></span></h2>
     <div class="card" id="chart"><div class="plans-empty">В этом месяце расходов пока нет.</div></div>
 
     <h2>Операции</h2>
@@ -359,19 +361,44 @@
     <div class="card" id="yearCats"></div>
   </div>
 
-  <h2>Данные</h2>
-  <div class="backup">
-    <button id="exportBtn">⬇ Бэкап</button>
-    <button id="importBtn">⬆ Восстановить</button>
-    <button id="csvBtn">📊 В Excel (CSV)</button>
-    <button id="baseCurBtn">💱 Валюта</button>
+  <div id="setView" style="display:none">
+    <h2>Оформление</h2>
+    <div class="backup">
+      <button id="palBtn">🎨 Цветовая схема</button>
+      <button id="baseCurBtn">💱 Основная валюта</button>
+    </div>
+    <p class="hint">Светлая/тёмная тема — кнопкой 🌓 в самом верху.</p>
+
+    <h2>Разделы главного экрана</h2>
+    <div class="card">
+      <p class="hint" style="text-align:left;margin:0 0 10px">Выключи то, чем не пользуешься — экран станет короче.</p>
+      <div class="chips" id="secChips"></div>
+    </div>
+
+    <h2>Банк</h2>
+    <div class="backup">
+      <button id="bankBtn">⬇️ Загрузить выписку из банка</button>
+    </div>
+    <p class="hint">Как выгрузить файл из своего банка — смотри в FAQ ниже.</p>
+
+    <h2>Данные</h2>
+    <div class="backup">
+      <button id="exportBtn">⬇ Бэкап</button>
+      <button id="importBtn">⬆ Восстановить</button>
+      <button id="csvBtn">📊 В Excel (CSV)</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <p class="hint">Данные хранятся только на этом телефоне.<br>Время от времени делай бэкап в файл.</p>
+
+    <h2>Помощь</h2>
+    <div class="backup">
+      <button id="faqBtn">❓ FAQ — инструкция</button>
+    </div>
   </div>
-  <input type="file" id="importFile" accept=".json" style="display:none">
-  <p class="hint">Данные хранятся только на этом телефоне.<br>Время от времени делай бэкап в файл.</p>
 </main>
 
-<button class="fab" id="addBtn">＋ Добавить</button>
-<div id="snack" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));background:var(--ink);color:var(--card);padding:12px 18px;border-radius:14px;font-size:14px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.3);display:none;align-items:center;gap:14px">
+<button class="fab" id="addBtn" aria-label="Добавить операцию" title="Добавить операцию">＋</button>
+<div id="snack" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));background:var(--ink);color:var(--card);padding:12px 18px;border-radius:14px;font-size:14px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.3);display:none;align-items:center;gap:14px">
   <span>Запись удалена</span>
   <button id="undoBtn" style="border:none;background:none;color:#7FE0B4;font-weight:700;font-size:14px;cursor:pointer">Вернуть</button>
 </div>
@@ -452,6 +479,120 @@
     <button class="save-btn" id="accSaveBtn">Сохранить счёт</button>
     <button class="danger-btn" id="accDeleteBtn">Удалить счёт</button>
     <button class="cancel-btn" id="accCancelBtn">Отмена</button>
+  </div>
+</div>
+
+<!-- Модалка FAQ -->
+<div class="sheet-wrap" id="faqWrap">
+  <div class="sheet">
+    <h3>❓ Как пользоваться «Кассой»</h3>
+    <style>
+      #faqWrap details{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:8px}
+      #faqWrap summary{font-weight:600;font-size:15px;cursor:pointer;padding:2px 0}
+      #faqWrap details div{font-size:14px;line-height:1.6;color:var(--ink2);padding-top:8px}
+      #faqWrap details div b{color:var(--ink)}
+      #faqWrap .sub details{margin-top:8px;background:var(--bg)}
+    </style>
+
+    <details><summary>🚀 Быстрый старт</summary><div>
+      1. Открой <b>⚙️ Настройки → 🏦</b> и своё текущее положение: тапни строку <b>«На руках · изменить»</b> на главном экране и введи, сколько у тебя сейчас денег в кошельке и на картах.<br>
+      2. Зайди в <b>«Счета и копилки»</b>, тапни по каждому счёту и укажи <b>остаток</b> — сколько там уже лежит.<br>
+      3. Добавь <b>плановые платежи</b> (зарплата, аренда, кредит) — появятся прогнозы.<br>
+      4. Дальше просто записывай траты кнопкой <b>«＋ Добавить»</b> или быстрыми шаблонами. Всё остальное приложение посчитает само.
+    </div></details>
+
+    <details><summary>➕ Как записывать операции</summary><div>
+      Кнопка <b>«＋ Добавить»</b> внизу. Три типа:<br>
+      <b>− Расход</b> — обычная трата. В поле «Откуда деньги» можно выбрать копилку — тогда спишется с неё, а не с рук.<br>
+      <b>＋ Доход</b> — поступление. «Куда положить» — на руки или сразу в копилку.<br>
+      <b>🏦 Копилка</b> — движение денег между своими местами: Отложить / Взять (копилки), Вложить / Вывести (инвестиции), Перевод (из копилки в копилку).<br>
+      Тап по любой записи в истории — <b>редактирование</b>. Удалил случайно — внизу появится кнопка <b>«Вернуть»</b>.
+    </div></details>
+
+    <details><summary>🏦 Счета, копилки и валюта</summary><div>
+      <b>«＋ счёт»</b> в разделе «Счета и копилки». Виды: накопления (Отпуск, Подушка…) и инвестиции (Брокер, Вклад…).<br>
+      У счёта можно задать: <b>валюту</b> (₽/$/€), <b>остаток</b> (что уже лежит), <b>цель</b> (для копилок — появится прогресс) или <b>текущую стоимость</b> (для инвестиций — посчитается прибыль).<br>
+      Валютный счёт живёт в своей валюте, а в общие итоги пересчитывается по курсу — курс задаётся при валютных операциях и хранится в приложении.
+    </div></details>
+
+    <details><summary>📅 Планы, прогнозы, автозапись</summary><div>
+      <b>«План на месяц»</b> — регулярные платежи: название, сумма, число месяца. Если дата выпадает на выходной, можно включить перенос: <b>«на пятницу до»</b> (зарплата) или <b>«на понедельник после»</b> (списания).<br>
+      Когда дата наступает, вверху появляется карточка <b>«По плану — пора записать»</b>: ✓ — записать одним тапом, ✕ — пропустить месяц.<br>
+      <b>«Прогноз на 6 месяцев»</b> показывает, сколько будет на руках вперёд, если жить по плану.
+    </div></details>
+
+    <details><summary>🥧 Лимиты, советы и ИИ</summary><div>
+      <b>«Лимиты»</b> в разделе категорий — задай потолок трат («Еда — 15 000»), полоска покажет заполнение и предупредит о перерасходе.<br>
+      <b>«Советы»</b> — приложение само подмечает: тратишь больше, чем зарабатываешь; на сколько месяцев хватит подушки; какая категория выросла.<br>
+      <b>«🤖 Спросить у ИИ»</b> — собирает готовый отчёт по твоим финансам. Скопируй его и вставь в Claude или другой ИИ-чат — получишь персональный разбор.
+    </div></details>
+
+    <details><summary>💼 Вкладки «Год» и «Капитал»</summary><div>
+      <b>Год</b> — доходы/расходы по месяцам (тап по столбику открывает месяц), сколько отложено, анализ года.<br>
+      <b>Капитал</b> — всё состояние: на руках + копилки + инвестиции. Переключателями выбирай, что суммировать.
+    </div></details>
+
+    <details><summary>💾 Бэкап и перенос на другой телефон</summary><div>
+      Данные хранятся <b>только на этом телефоне</b> и никуда не отправляются. Поэтому:<br>
+      • Раз в месяц жми <b>⚙️ → «⬇ Бэкап»</b> — сохранится файл.<br>
+      • На новом телефоне (или у мамы) — <b>«⬆ Восстановить»</b> и выбери этот файл.<br>
+      • <b>«📊 В Excel»</b> — выгрузка всех операций таблицей для своих расчётов.<br>
+      Если почистить данные браузера — записи пропадут. Бэкап — твоя страховка.
+    </div></details>
+
+    <details><summary>📲 Установка на телефон</summary><div>
+      <b>iPhone:</b> открой сайт в Safari → кнопка «Поделиться» → <b>«На экран „Домой“»</b>.<br>
+      <b>Android:</b> открой в Chrome → меню ⋮ → <b>«Установить приложение»</b>.<br>
+      После этого работает как обычное приложение, в том числе без интернета.
+    </div></details>
+
+    <details><summary>🏧 Как выгрузить выписку из банка</summary><div class="sub">
+      Общий принцип везде один: в банке найти <b>историю операций или выписку</b>, сохранить её <b>файлом CSV или Excel</b>, затем в «Кассе»: ⚙️ → <b>«⬇️ Загрузить выписку из банка»</b>. Если банк даёт только Excel (.xlsx) — открой его в Excel или Google Таблицах и пересохрани как CSV. Пункты меню в банках иногда переименовывают, но логика та же.
+      <details><summary>Сбербанк</summary><div>
+        Проще через сайт: зайди в <b>СберБанк Онлайн в браузере</b> (web.sberbank.ru) → выбери карту → <b>«Выписки и справки»</b> → «Выписка по счёту» → период → сохранить. Если скачался Excel или PDF: Excel пересохрани в CSV; из PDF данные придётся переносить руками — лучше выбирай Excel.
+      </div></details>
+      <details><summary>Т-Банк (Тинькофф)</summary><div>
+        Самый удобный: зайди на <b>tbank.ru в браузере</b> → карта → <b>«Выписка»</b> или история операций → период → скачать, среди форматов есть <b>CSV</b> — бери его. Файл подходит для загрузки как есть.
+      </div></details>
+      <details><summary>ВТБ</summary><div>
+        <b>ВТБ Онлайн в браузере</b> → счёт/карта → <b>«Выписка»</b> → период → скачать (Excel/CSV). Excel пересохрани как CSV.
+      </div></details>
+      <details><summary>Альфа-Банк</summary><div>
+        <b>Альфа-Клик в браузере</b> → счёт → <b>«Выписка по счёту»</b> → период → сохранить в Excel/CSV. Excel пересохрани как CSV.
+      </div></details>
+      <details><summary>Другой банк</summary><div>
+        Ищи слова «Выписка», «История операций», «Сохранить/Отправить/Экспорт». Годится любой файл-таблица, где есть колонки <b>дата</b>, <b>сумма</b> (расходы с минусом) и <b>описание</b>. «Касса» сама найдёт нужные колонки.
+      </div></details>
+    </div></details>
+
+    <button class="cancel-btn" id="faqCancelBtn" style="margin-top:8px">Закрыть</button>
+  </div>
+</div>
+
+<!-- Модалка импорта из банка -->
+<div class="sheet-wrap" id="bankWrap">
+  <div class="sheet">
+    <h3>⬇️ Выписка из банка</h3>
+    <p class="hint" style="text-align:left;margin:0 0 12px">Выписки из разных банков <b>складываются</b>: загружай хоть Сбер, хоть Т-Банк, хоть все сразу — операции дополняют друг друга, ничего не затирается. Повторная загрузка того же файла дублей не создаст. Файл обрабатывается на телефоне и никуда не отправляется.</p>
+    <div class="field">
+      <label>Из какого банка выписка</label>
+      <div class="chips" id="bankChips"></div>
+    </div>
+    <button class="save-btn" id="bankPickBtn" style="margin-top:0">Выбрать файл выписки (CSV)</button>
+    <input type="file" id="bankFile" accept=".csv,.txt" style="display:none">
+    <div id="bankResult" style="margin-top:12px"></div>
+    <button class="save-btn" id="bankImportBtn" style="display:none">Импортировать</button>
+    <button class="cancel-btn" id="bankCancelBtn">Закрыть</button>
+  </div>
+</div>
+
+<!-- Модалка оформления -->
+<div class="sheet-wrap" id="palWrap">
+  <div class="sheet">
+    <h3>🎨 Оформление</h3>
+    <p class="hint" style="text-align:left;margin:0 0 12px">Выбери цветовую схему. Светлая/тёмная переключается кнопкой 🌓 сверху и работает с любой схемой.</p>
+    <div id="palList"></div>
+    <button class="cancel-btn" id="palCancelBtn">Закрыть</button>
   </div>
 </div>
 
@@ -596,7 +737,7 @@ const CURRENCIES = ['₽','$','€'];
 
 function load(){
   let db = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}};
+            templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}};
   try {
     const raw = JSON.parse(localStorage.getItem(KEY));
     if (Array.isArray(raw)) db.txs = raw;
@@ -607,7 +748,7 @@ function load(){
       db.customCats = raw.customCats||{exp:[],inc:[]};
       db.accounts = raw.accounts||[];
       db.templates = raw.templates||[];
-      db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}, raw.settings||{});
+      db.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}, raw.settings||{});
       db.settings.mix = Object.assign({hand:true,sav:true,inv:true}, db.settings.mix||{});
       db.settings.rates = Object.assign({'$':90,'€':100}, db.settings.rates||{});
       db._oldGoal = raw.goal||0;
@@ -696,6 +837,7 @@ function txLabel(t){
 }
 function txVia(t){
   const parts = [];
+  if (t.bank) parts.push('🏛 ' + t.bank);
   if (t.fx) parts.push(t.fx.sum + ' ' + t.fx.cur + ' по ' + t.fx.rate);
   if (t.type==='exp' && t.src){ const a=accById(t.src); parts.push('из «'+(a?a.name:'?')+'»'); }
   if (t.type==='inc' && t.dst){ const a=accById(t.dst); parts.push('в «'+(a?a.name:'?')+'»'); }
@@ -740,15 +882,19 @@ function plansLeft(now){
 function render(){
   const isYear = viewMode==='year';
   const isCap  = viewMode==='cap';
-  $('monthView').style.display = (!isYear && !isCap) ? 'block' : 'none';
+  const isSet  = viewMode==='set';
+  $('monthView').style.display = (!isYear && !isCap && !isSet) ? 'block' : 'none';
   $('yearView').style.display  = isYear ? 'block' : 'none';
   $('capView').style.display   = isCap ? 'block' : 'none';
-  $('tabMonth').className = (!isYear && !isCap) ? 'on' : '';
+  $('setView').style.display   = isSet ? 'block' : 'none';
+  $('tabMonth').className = (!isYear && !isCap && !isSet) ? 'on' : '';
   $('tabYear').className  = isYear ? 'on' : '';
   $('tabCap').className   = isCap ? 'on' : '';
-  $('monthName').textContent = isCap ? 'Мой капитал' : (isYear ? viewYear : MONTHS[viewMonth]+' '+viewYear);
-  $('prevM').style.visibility = isCap ? 'hidden' : 'visible';
-  $('nextM').style.visibility = isCap ? 'hidden' : 'visible';
+  $('tabSet').className   = isSet ? 'on' : '';
+  $('monthName').textContent = isSet ? 'Настройки' : (isCap ? 'Мой капитал' : (isYear ? viewYear : MONTHS[viewMonth]+' '+viewYear));
+  $('prevM').style.visibility = (isCap||isSet) ? 'hidden' : 'visible';
+  $('nextM').style.visibility = (isCap||isSet) ? 'hidden' : 'visible';
+  if (isSet) renderSettings();
 
   const handNow = (DB.settings.handStart||0) + DB.txs.reduce((s,t)=>s+flow(t),0);
   $('wallet').textContent = fmt(handNow);
@@ -1787,6 +1933,7 @@ $('budgetSaveBtn').onclick = () => {
 $('tabMonth').onclick = () => { viewMode='month'; render(); };
 $('tabYear').onclick  = () => { viewMode='year';  render(); };
 $('tabCap').onclick   = () => { viewMode='cap';   render(); };
+$('tabSet').onclick   = () => { viewMode='set';   render(); };
 $('prevM').onclick = () => {
   if (viewMode==='year'){ viewYear--; }
   else { viewMonth--; if (viewMonth<0){ viewMonth=11; viewYear--; } }
@@ -1813,7 +1960,7 @@ $('exportBtn').onclick = () =>
 
 $('csvBtn').onclick = () => {
   const TYPE_RU = {inc:'Доход', exp:'Расход', save:'В накопления', take:'Из накоплений', invest:'В инвестиции', divest:'Из инвестиций', move:'Перевод'};
-  const rows = [['Дата','Тип','Категория','Счёт','Сумма','Валюта операции','Заметка']];
+  const rows = [['Дата','Тип','Категория','Счёт','Сумма','Валюта операции','Банк','Заметка']];
   [...DB.txs].sort((a,b)=>a.date<b.date?-1:1).forEach(t => {
     const aid = t.acc || t.src || t.dst;
     const a = aid ? accById(aid) : null;
@@ -1823,6 +1970,7 @@ $('csvBtn').onclick = () => {
       accName,
       String(t.sum).replace('.',','),
       t.fx ? (String(t.fx.sum).replace('.',',')+' '+t.fx.cur+' по '+String(t.fx.rate).replace('.',',')) : '—',
+      t.bank || '—',
       (t.note||'').replace(/[;\n]/g,' ')]);
   });
   const csv = '\uFEFF' + rows.map(r=>r.join(';')).join('\r\n');
@@ -1837,7 +1985,7 @@ $('importFile').onchange = e => {
     try {
       const data = JSON.parse(r.result);
       let next = {txs:[], plans:[], budgets:{}, customCats:{exp:[],inc:[]}, accounts:[],
-                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}};
+                  templates:[], settings:{cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}};
       if (Array.isArray(data)) next.txs = data;
       else if (data && Array.isArray(data.txs)){
         next.txs = data.txs;
@@ -1846,7 +1994,7 @@ $('importFile').onchange = e => {
         next.customCats = data.customCats||{exp:[],inc:[]};
         next.accounts = data.accounts||[];
         next.templates = data.templates||[];
-        next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}}, data.settings||{});
+        next.settings = Object.assign({cur:'₽', rates:{'$':90,'€':100}, mix:{hand:true,sav:true,inv:true}, handStart:0, theme:'auto', collapsed:{}, palette:'emerald', hidden:{}}, data.settings||{});
         next._oldGoal = data.goal||0;
         next._oldInvestValue = data.investValue||0;
       } else throw 0;
@@ -1923,8 +2071,203 @@ $('aiCopyBtn').onclick = () => {
   } else { $('aiReport').select(); document.execCommand('copy'); done(); }
 };
 
-// ============ ТЕМА ============
+// ============ FAQ ============
+const faqWrap = $('faqWrap');
+$('faqBtn').onclick = () => faqWrap.classList.add('open');
+$('faqCancelBtn').onclick = () => faqWrap.classList.remove('open');
+faqWrap.onclick = e => { if (e.target===faqWrap) faqWrap.classList.remove('open'); };
+
+// ============ ИМПОРТ ВЫПИСКИ ИЗ БАНКА ============
+const bankWrap = $('bankWrap');
+let bankPending = [];
+const BANK_CATS = [
+  [/пятерочк|пятёрочк|магнит|перекрест|лента|ашан|дикси|вкусвилл|окей|spar|метро|светофор|верный|продукт|супермарк|grocer/i, 'Еда'],
+  [/кафе|ресторан|кофе|coffee|бар |бургер|burger|kfc|макдон|вкусно|шаурм|суши|пицц|pizza|додо|теремок|столов/i, 'Кафе'],
+  [/такси|taxi|метрополитен|автобус|проезд|транспорт|азс|лукойл|роснефт|газпромнефт|топлив|каршер|яндекс.?драйв|самокат.*аренд|whoosh|парковк/i, 'Транспорт'],
+  [/аптек|клиник|больниц|стоматолог|анализ|мед|доктор|врач/i, 'Здоровье'],
+  [/ozon|озон|wildberries|вайлдбер|wb |яндекс.?маркет|aliexpress|ситилинк|днс|dns|мвидео|эльдорадо|леруа|hoff|икеа|ikea/i, 'Покупки'],
+  [/мтс|билайн|мегафон|теле2|tele2|йота|yota|ростелеком|интернет|связь/i, 'Связь'],
+  [/жкх|квартплат|аренда|коммунал|электроэнерг|мосэнерго|водоканал|газ |управляющ/i, 'Жильё'],
+  [/кино|театр|концерт|steam|playstation|xbox|подписк|netflix|кинопоиск|иви|ivi|okko|спотифай|spotify|яндекс.?плюс|музыка|игр/i, 'Развлечения']
+];
+function autoCat(desc){
+  for (const [re, cat] of BANK_CATS) if (re.test(desc)) return cat;
+  return 'Другое';
+}
+function splitCsvLine(line, sep){
+  const out = []; let cur = '', q = false;
+  for (let i=0; i<line.length; i++){
+    const ch = line[i];
+    if (ch === '"'){ 
+      if (q && line[i+1] === '"'){ cur += '"'; i++; } else q = !q;
+    } else if (ch === sep && !q){ out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(s => s.trim());
+}
+function parseBankCsv(text){
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return {err: 'Файл пустой или слишком короткий.'};
+  // разделитель — какой чаще в первых строках
+  const probe = lines.slice(0, 3).join('\n');
+  let sep = ';';
+  const counts = {';': (probe.match(/;/g)||[]).length, ',': (probe.match(/,/g)||[]).length, '\t': (probe.match(/\t/g)||[]).length};
+  sep = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  // строка заголовков — первая, где есть «дата»
+  let hIdx = lines.findIndex(l => /дата|date/i.test(l));
+  if (hIdx < 0) hIdx = 0;
+  const head = splitCsvLine(lines[hIdx], sep).map(h => h.toLowerCase());
+  const find = (...res) => {
+    for (const re of res){
+      const i = head.findIndex(h => re.test(h));
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
+  const iDate = find(/дата.?операции/, /дата.?платеж/, /^дата/, /date/);
+  let iSum = find(/сумма.?операции/, /сумма.?платеж/, /^сумма/, /amount/);
+  const iDesc = find(/описание/, /назначение/, /категория/, /контрагент/, /детали/, /операция/, /description|merchant/);
+  const iStatus = find(/статус|status/);
+  if (iDate < 0 || iSum < 0) return {err: 'Не нашёл колонки «Дата» и «Сумма». Проверь, что это CSV-выписка с заголовками.'};
+  const res = [];
+  for (let k = hIdx+1; k < lines.length; k++){
+    const cells = splitCsvLine(lines[k], sep);
+    if (cells.length < 2) continue;
+    if (iStatus >= 0 && cells[iStatus] && /fail|отказ|отмен|cancel/i.test(cells[iStatus])) continue;
+    // дата: DD.MM.YYYY или YYYY-MM-DD, возможно со временем
+    const dRaw = (cells[iDate]||'').trim();
+    let iso = null, m;
+    if ((m = dRaw.match(/^(\d{2})\.(\d{2})\.(\d{4})/))) iso = m[3]+'-'+m[2]+'-'+m[1];
+    else if ((m = dRaw.match(/^(\d{4})-(\d{2})-(\d{2})/))) iso = m[1]+'-'+m[2]+'-'+m[3];
+    if (!iso) continue;
+    const sRaw = (cells[iSum]||'').replace(/\s|\u00a0/g,'').replace(',','.');
+    const val = parseFloat(sRaw);
+    if (!val || isNaN(val)) continue;
+    const desc = iDesc >= 0 ? (cells[iDesc]||'').slice(0,60) : '';
+    const type = val < 0 ? 'exp' : 'inc';
+    res.push({
+      date: iso, type, sum: Math.abs(val),
+      cat: type==='exp' ? autoCat(desc) : 'Другое',
+      note: desc
+    });
+  }
+  return {rows: res};
+}
+const BANKS = ['Сбер','Т-Банк','ВТБ','Альфа','Другой'];
+let bankPick = 'Сбер';
+function renderBankChips(){
+  $('bankChips').innerHTML = BANKS.map(b =>
+    `<button class="chip ${b===bankPick?'sel':''}" data-b="${b}">${b}</button>`).join('');
+  $('bankChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    bankPick = ch.dataset.b; renderBankChips();
+  });
+}
+// сводка: сколько операций уже загружено из каждого банка
+function bankStats(){
+  const st = {};
+  DB.txs.forEach(t => { if (t.bank) st[t.bank] = (st[t.bank]||0)+1; });
+  return st;
+}
+$('bankBtn').onclick = () => {
+  bankPending = [];
+  renderBankChips();
+  const st = bankStats();
+  const keys = Object.keys(st);
+  $('bankResult').innerHTML = keys.length
+    ? '<div class="plans-empty" style="text-align:left;padding:6px 0 0">Уже загружено: ' +
+      keys.map(k => k+' — '+st[k]).join(', ') + '</div>'
+    : '';
+  $('bankImportBtn').style.display = 'none';
+  bankWrap.classList.add('open');
+};
+$('bankCancelBtn').onclick = () => bankWrap.classList.remove('open');
+bankWrap.onclick = e => { if (e.target===bankWrap) bankWrap.classList.remove('open'); };
+$('bankPickBtn').onclick = () => $('bankFile').click();
+$('bankFile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const handle = text => {
+    const p = parseBankCsv(text);
+    if (p.err){ $('bankResult').innerHTML = '<div class="plans-empty">⚠️ '+p.err+'</div>'; return; }
+    // Дубль = та же дата, сумма, тип И то же описание, загруженное из ТОГО ЖЕ банка.
+    // Одинаковые суммы из разных банков — это разные траты, они складываются.
+    const keyOf = (date, type, sum, note, bank) =>
+      date+'|'+type+'|'+sum+'|'+String(note||'').trim().toLowerCase()+'|'+(bank||'');
+    const seen = new Set(DB.txs.map(t => keyOf(t.date, t.type, t.sum, t.note, t.bank)));
+    bankPending = [];
+    let dup = 0;
+    p.rows.forEach(r => {
+      r.bank = bankPick;
+      const key = keyOf(r.date, r.type, r.sum, r.note, bankPick);
+      if (seen.has(key)){ dup++; return; }
+      seen.add(key);
+      bankPending.push(r);
+    });
+    const exp = bankPending.filter(r=>r.type==='exp').length;
+    const inc = bankPending.filter(r=>r.type==='inc').length;
+    const st = bankStats();
+    const already = Object.keys(st).length
+      ? '<br>Уже в приложении: ' + Object.keys(st).map(k=>k+' — '+st[k]).join(', ') + ' (эти записи останутся).'
+      : '';
+    let html = '<div class="plans-empty" style="text-align:left;padding:0 0 10px">Выписка: <b>'+esc(bankPick)+'</b>. Найдено операций: '+p.rows.length+
+      (dup ? ' (пропущено дублей: '+dup+')' : '')+'.<br>К добавлению: <b>'+bankPending.length+'</b> — '+exp+' расходов, '+inc+' доходов.'+already+'</div>';
+    if (bankPending.length){
+      html += '<div class="yrows">'+bankPending.slice(0,8).map(r =>
+        '<div class="yrow"><b>'+r.date.slice(8,10)+'.'+r.date.slice(5,7)+' · '+esc(r.cat)+'</b><span class="num" style="color:'+(r.type==='exp'?'var(--exp)':'var(--inc)')+'">'+(r.type==='exp'?'−':'+')+fmt(r.sum)+'</span></div>').join('')+
+        (bankPending.length>8 ? '<div class="yrow"><b>… и ещё '+(bankPending.length-8)+'</b><span></span></div>' : '')+'</div>';
+    }
+    $('bankResult').innerHTML = html;
+    $('bankImportBtn').style.display = bankPending.length ? 'block' : 'none';
+    $('bankImportBtn').textContent = 'Импортировать '+bankPending.length+' операций';
+  };
+  const r1 = new FileReader();
+  r1.onload = () => {
+    const txt = r1.result;
+    if (txt.includes('\uFFFD')){
+      const r2 = new FileReader();
+      r2.onload = () => handle(r2.result);
+      r2.readAsText(f, 'windows-1251');
+    } else handle(txt);
+  };
+  r1.readAsText(f, 'utf-8');
+  e.target.value = '';
+};
+$('bankImportBtn').onclick = () => {
+  bankPending.forEach(r => DB.txs.push({ id: uid(), type: r.type, sum: r.sum, cat: r.cat,
+    note: r.note, date: r.date, bank: r.bank }));
+  save();
+  bankWrap.classList.remove('open');
+  bankPending = [];
+  viewMode = 'month';
+  render();
+};
+
+// ============ ТЕМА И ПАЛИТРЫ ============
 const THEME_ICONS = {auto:'🌓', dark:'🌙', light:'☀️'};
+const PALETTES = {
+  emerald: {name:'Изумруд', ico:'🌲',
+    l:{bg:'#EFF2EE',card:'#FFFFFF',accent:'#16241F',sav:'#1F5FA8','sav-bg':'#E5EEF8',ink:'#16241F',ink2:'#5C6B63',line:'#DFE5E0',inc:'#0E8A5F','inc-bg':'#E3F3EC',exp:'#C4452F','exp-bg':'#F9E9E5',radius:'16px'},
+    d:{bg:'#101714',card:'#1B2420',accent:'#0C1310',sav:'#6FA3E8','sav-bg':'#1b2a3c',ink:'#E8EFEA',ink2:'#90A199',line:'#2B3631',inc:'#3DBB8C','inc-bg':'#15302a',exp:'#E0705A','exp-bg':'#39201b',radius:'16px'}},
+  ocean: {name:'Океан', ico:'🌊',
+    l:{bg:'#EAF1F7',card:'#FFFFFF',accent:'#0F2C42',sav:'#2C7A99','sav-bg':'#E1EEF4',ink:'#122431',ink2:'#5A6E7C',line:'#D8E2EA',inc:'#0F8A6E','inc-bg':'#E0F2ED',exp:'#C75146','exp-bg':'#F9E8E6',radius:'20px'},
+    d:{bg:'#0C1319',card:'#152230',accent:'#081420',sav:'#63B3CF','sav-bg':'#12293b',ink:'#E4EDF3',ink2:'#87A0B0',line:'#22303E',inc:'#3EC2A0','inc-bg':'#0f2e28',exp:'#E27B6C','exp-bg':'#3a1f1b',radius:'20px'}},
+  plum: {name:'Слива', ico:'🍇',
+    l:{bg:'#F3EFF5',card:'#FFFFFF',accent:'#2A1B33',sav:'#7B4FA3','sav-bg':'#EEE6F6',ink:'#241A2C',ink2:'#6E6178',line:'#E3DBE8',inc:'#2E8B5F','inc-bg':'#E4F2EA',exp:'#BB3E63','exp-bg':'#F8E6EC',radius:'22px'},
+    d:{bg:'#141018',card:'#1F1826',accent:'#0F0A14',sav:'#B08BD9','sav-bg':'#291f38',ink:'#ECE6F1',ink2:'#9A8FA6',line:'#2E2438',inc:'#4EBD8B','inc-bg':'#16302a',exp:'#E06A8C','exp-bg':'#3a1b26',radius:'22px'}},
+  graphite: {name:'Графит', ico:'⬛️',
+    l:{bg:'#F1F2F3',card:'#FFFFFF',accent:'#1C1E21',sav:'#4A5A6A','sav-bg':'#E6EBEF',ink:'#1C1E21',ink2:'#65707A',line:'#E0E3E6',inc:'#2E7D57','inc-bg':'#E4F0EA',exp:'#B5443A','exp-bg':'#F7E8E6',radius:'10px'},
+    d:{bg:'#111214',card:'#1B1D20',accent:'#0A0B0C',sav:'#8FA6BA','sav-bg':'#222b34',ink:'#E9EAEC',ink2:'#8C949C',line:'#2A2D31',inc:'#48A87C','inc-bg':'#16281f',exp:'#D3685C','exp-bg':'#341d19',radius:'10px'}},
+  terra: {name:'Терракота', ico:'🏜',
+    l:{bg:'#F6F1EB',card:'#FFFDF9',accent:'#3A2419',sav:'#A2543A','sav-bg':'#F6E7DF',ink:'#33261D',ink2:'#7C6B5D',line:'#E9DFD4',inc:'#4E7C3A','inc-bg':'#EAF1E2',exp:'#B03A2E','exp-bg':'#F8E5E1',radius:'14px'},
+    d:{bg:'#171210',card:'#241C17',accent:'#110C09',sav:'#D99270','sav-bg':'#33241b',ink:'#EFE7DF',ink2:'#A08D7C',line:'#332A23',inc:'#7FB35E','inc-bg':'#20301a',exp:'#DD7A62','exp-bg':'#3a1f18',radius:'14px'}}
+};
+const darkMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+function isDarkNow(){
+  const t = DB.settings.theme || 'auto';
+  if (t==='dark') return true;
+  if (t==='light') return false;
+  return darkMedia ? darkMedia.matches : false;
+}
 function applyTheme(){
   const t = DB.settings.theme || 'auto';
   document.documentElement.classList.remove('theme-dark','theme-light');
@@ -1932,7 +2275,15 @@ function applyTheme(){
   if (t==='light') document.documentElement.classList.add('theme-light');
   $('themeBtn').textContent = THEME_ICONS[t];
   $('themeBtn').title = {auto:'Тема: как в системе', dark:'Тема: тёмная', light:'Тема: светлая'}[t];
+  // палитра поверх светлой/тёмной базы
+  const p = PALETTES[DB.settings.palette] || PALETTES.emerald;
+  const v = isDarkNow() ? p.d : p.l;
+  const r = document.documentElement.style;
+  Object.entries(v).forEach(([k,val]) => r.setProperty('--'+k, val));
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', v.accent);
 }
+if (darkMedia && darkMedia.addEventListener) darkMedia.addEventListener('change', applyTheme);
 $('themeBtn').onclick = () => {
   const order = ['auto','dark','light'];
   const cur = DB.settings.theme || 'auto';
@@ -1940,15 +2291,43 @@ $('themeBtn').onclick = () => {
   save(); applyTheme();
 };
 
+// выбор палитры
+const palWrap = $('palWrap');
+function renderPalList(){
+  const cur = DB.settings.palette || 'emerald';
+  $('palList').innerHTML = Object.entries(PALETTES).map(([k,p]) => `
+    <div class="acc" data-pal="${k}" style="${k===cur?'outline:2px solid var(--sav)':''}">
+      <div class="acc-top">
+        <span style="display:inline-flex;gap:4px;align-items:center">
+          <span>${p.ico}</span>
+          <i style="width:16px;height:16px;border-radius:5px;background:${p.l.accent}"></i>
+          <i style="width:16px;height:16px;border-radius:5px;background:${p.l.sav}"></i>
+          <i style="width:16px;height:16px;border-radius:5px;background:${p.l.exp}"></i>
+        </span>
+        <span class="acc-name">${p.name}</span>
+        <span class="acc-sum">${k===cur?'✓':''}</span>
+      </div>
+    </div>`).join('');
+  $('palList').querySelectorAll('.acc').forEach(el => el.onclick = () => {
+    DB.settings.palette = el.dataset.pal;
+    save(); applyTheme(); renderPalList();
+  });
+}
+$('palBtn').onclick = () => { renderPalList(); palWrap.classList.add('open'); };
+$('palCancelBtn').onclick = () => palWrap.classList.remove('open');
+palWrap.onclick = e => { if (e.target===palWrap) palWrap.classList.remove('open'); };
+
 // ============ СВОРАЧИВАНИЕ РАЗДЕЛОВ ============
+const SECS = [];
 function initCollapsibles(){
   if (!DB.settings.collapsed) DB.settings.collapsed = {};
-  const containers = [document.querySelector('main'), $('monthView'), $('yearView'), $('capView')];
+  if (!DB.settings.hidden) DB.settings.hidden = {};
+  const containers = [document.querySelector('main'), $('monthView'), $('yearView'), $('capView'), $('setView')];
   containers.forEach(root => {
     if (!root) return;
     [...root.children].forEach(el => {
       if (el.tagName !== 'H2') return;
-      const key = el.textContent.replace(/[▸▾]/g,'').trim().split(' ').slice(0,2).join('_');
+      const key = el.dataset.sec || el.textContent.replace(/[▸▾]/g,'').trim().split(' ').slice(0,2).join('_');
       // собираем соседей до следующего H2/конца в обёртку
       const body = document.createElement('div');
       let next = el.nextElementSibling;
@@ -1961,8 +2340,10 @@ function initCollapsibles(){
       chev.style.cssText = 'margin-left:auto;padding-left:8px;transition:none';
       el.querySelector('.h-btns') ? el.insertBefore(chev, el.querySelector('.h-btns')) : el.appendChild(chev);
       const apply = () => {
+        const hid = !!DB.settings.hidden[key];
         const c = !!DB.settings.collapsed[key];
-        body.style.display = c ? 'none' : '';
+        el.style.display = hid ? 'none' : '';
+        body.style.display = (hid || c) ? 'none' : '';
         chev.textContent = c ? '▸' : '▾';
       };
       el.style.cursor = 'pointer';
@@ -1971,8 +2352,27 @@ function initCollapsibles(){
         DB.settings.collapsed[key] = !DB.settings.collapsed[key];
         save(); apply();
       });
+      SECS.push({key, apply});
       apply();
     });
+  });
+}
+function applyAllSecs(){ SECS.forEach(s=>s.apply()); }
+
+// ============ НАСТРОЙКИ: РАЗДЕЛЫ ============
+const TOGGLABLE = [
+  {k:'tpl',    n:'⚡️ Быстрые траты'},
+  {k:'advice', n:'💡 Советы'},
+  {k:'plans',  n:'📅 План на месяц'},
+  {k:'six',    n:'📈 Прогноз на 6 месяцев'},
+  {k:'chart',  n:'🥧 Расходы по категориям'}
+];
+function renderSettings(){
+  $('secChips').innerHTML = TOGGLABLE.map(s =>
+    `<button class="chip ${!DB.settings.hidden[s.k]?'sel':''}" data-k="${s.k}">${s.n}</button>`).join('');
+  $('secChips').querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    DB.settings.hidden[ch.dataset.k] = !DB.settings.hidden[ch.dataset.k];
+    save(); applyAllSecs(); renderSettings();
   });
 }
 
